@@ -20,9 +20,7 @@
 
   user-select: none;
 
-  /* 
   overflow: hidden;
-  */
 }
 
 .container {
@@ -142,18 +140,39 @@ button {
 }
 
 #pipeline-wrapper {
-  height: 80vh;
-  background-color: #24c8db;
+  height: 65vh;
   display: flex;
 }
 .pipeline {
-  height: 100%;
+  height: 98.46%;
   width: 20%;
-  box-shadow: inset 0 0 0 1px red;
+  box-shadow: inset 0 0 0 1px rgb(194, 194, 194);
   margin: 0;
-  padding: 5px;
+  padding: 0.5vh;
 }
 
 #fetch-div {
-  background-color: #535bf2;
+}
+
+#rom-div,
+#ram-div,
+#register-div {
+  font-family: monospace; /* Für besser lesbare Speicherwerte */
+  white-space: nowrap; /* verhindert Zeilenumbruch innerhalb von Speicherwerten */
+
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  box-sizing: border-box;
+  width: 33%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+#mem-wrapper {
+  height: 25vh;
+  padding: 0.5vh;
+  display: flex;
+  background-color: #080808;
 }

@@ -15,10 +15,10 @@ pub mod proc {
     }
 
     impl FetchPhase {
-        fn rising_edge(&mut self, rom: &Vec<i32>, pc: i32) {
+        fn rising_edge(&mut self, rom: &Vec<i32>) {
             println!("FetchPhase rising edge");
             self.ir = rom[self.pc as usize];
-            self.pc = pc + 1;
+            self.pc = self.pc + 1;
             println!("IR: {:032b}", self.ir);
         }
 
@@ -438,7 +438,7 @@ pub mod proc {
             let memory_clone = self.memory.clone();
 
             let mut pc = self.memory.get_pc();
-            self.fetch.rising_edge(&self.rom, pc);
+            self.fetch.rising_edge(&self.rom);
 
             self.decode.rising_edge(
                 fetch_clone.get_ir(),
@@ -491,7 +491,7 @@ pub mod proc {
         pub fn new(path: PathBuf) -> Processor {
             let rom = DataReader::read_rom_from_file(&path, 1024);
             let ram = vec![0; 1024];
-            let fetch = FetchPhase { pc: 3, ir: 0 };
+            let fetch = FetchPhase { pc: 0, ir: 0 };
             let decode = DecodePhase {
                 reg_bank: vec![0; 32],
                 ir: 0,
@@ -533,7 +533,7 @@ pub mod proc {
                 addr: 0,
                 nwe: false,
                 data_out: 0,
-                pc: 0,
+                pc: -1,
                 br_flag: false,
             };
             let write_back = WriteBackPhase {
