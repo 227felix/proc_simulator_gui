@@ -120,7 +120,6 @@ button {
 }
 
 .vid {
-
   width: 50%;
   height: auto;
   margin-top: 2em;
@@ -131,15 +130,11 @@ button {
   /* allow overflow */
   overflow: auto;
   max-height: 50vh;
-
 }
-
-
 
 #clock-p {
   display: flex;
   justify-content: center;
-
 }
 
 #proc-div {
@@ -149,13 +144,16 @@ button {
 #pipeline-wrapper {
   height: 80vh;
   background-color: #24c8db;
+  display: flex;
 }
 .pipeline {
-  height: 20%;
-  border: 1px solid #ad3232;
+  height: 100%;
+  width: 20%;
+  box-shadow: inset 0 0 0 1px red;
   margin: 0;
+  padding: 5px;
 }
 
 #fetch-div {
-  background-color: #f6f6f6;
+  background-color: #535bf2;
 }
