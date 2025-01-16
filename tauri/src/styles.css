@@ -145,3 +145,17 @@ button {
 #proc-div {
   width: 100%;
 }
+
+#pipeline-wrapper {
+  height: 80vh;
+  background-color: #24c8db;
+}
+.pipeline {
+  height: 20%;
+  border: 1px solid #ad3232;
+  margin: 0;
+}
+
+#fetch-div {
+  background-color: #f6f6f6;
+}
