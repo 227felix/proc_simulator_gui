@@ -253,4 +253,18 @@ window.addEventListener("DOMContentLoaded", async () => {
       });
     }
   });
+
+  let reset_button = document.querySelector("#reset-button");
+  reset_button.addEventListener("click", async (e) => {
+    let new_state = await invoke("reset_processor", {});
+    let new_state_obj = JSON.parse(new_state);
+    update_state(new_state_obj);
+  });
+
+  let load_button = document.querySelector("#load-button");
+  load_button.addEventListener("click", async (e) => {
+    let new_state = await invoke("load_program", {});
+    let new_state_obj = JSON.parse(new_state);
+    update_state(new_state_obj);
+  });
 });

@@ -49,20 +49,34 @@ fn set_num_representation(state: State<'_, Arc<ProcessorState>>, representation:
     processor.set_num_rep(representation);
 }
 
+#[tauri::command]
+fn reset_processor(state: State<'_, Arc<ProcessorState>>) -> String {
+    let mut processor = state.processor.lock().unwrap();
+    let new_processor = processor.reset();
+    *processor = new_processor;
+    processor.get_state_serialized()
+}
+
+#[tauri::command]
+fn load_program(app: tauri::AppHandle, state: State<'_, Arc<ProcessorState>>) -> String {
+    let mut processor = state.processor.lock().unwrap();
+    // open file dialog to get file path
+    let rom_file = app
+        .dialog()
+        .file()
+        .blocking_pick_file()
+        .expect("Failed to open file")
+        .into_path()
+        .unwrap();
+    let new_proc = processor.load_program(rom_file);
+    *processor = new_proc;
+    processor.get_state_serialized()
+}
+
 fn main() {
     tauri::Builder::default()
         .setup(|app| {
-            let file_path = app
-                .dialog()
-                .file()
-                .blocking_pick_file()
-                .expect("Failed to open file")
-                .into_path()
-                .unwrap();
-
-            // let file_path = PathBuf::from("C:\\Git Repositories\\proc_simulator\\src\\rom.dat");
-
-            let proc = Processor::new(file_path, "hex".to_string());
+            let proc = Processor::new_empty_rom();
 
             let processor_state = ProcessorState {
                 processor: Mutex::new(proc),
@@ -79,7 +93,9 @@ fn main() {
             file_test,
             clock_processor,
             get_state,
-            set_num_representation
+            set_num_representation,
+            reset_processor,
+            load_program
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

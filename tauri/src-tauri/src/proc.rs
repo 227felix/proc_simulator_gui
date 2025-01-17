@@ -16,15 +16,11 @@ pub mod proc {
 
     impl FetchPhase {
         fn rising_edge(&mut self, rom: &Vec<i32>) {
-            println!("FetchPhase rising edge");
             self.ir = rom[self.pc as usize];
             self.pc = self.pc + 1;
-            println!("IR: {:032b}", self.ir);
         }
 
-        fn falling_edge(&self) {
-            println!("FetchPhase falling edge");
-        }
+        fn falling_edge(&self) {}
 
         fn get_ir(&self) -> i32 {
             self.ir
@@ -57,8 +53,6 @@ pub mod proc {
 
     impl DecodePhase {
         fn rising_edge(&mut self, ir: i32, wb: i32, wb_addr: i32, write_en: bool, pc: i32) {
-            println!("DecodePhase rising edge");
-
             self.ir = ir;
 
             self.opcode = (self.ir >> 26) as i8;
@@ -78,12 +72,9 @@ pub mod proc {
             if write_en {
                 self.reg_bank[wb_addr as usize] = wb;
             }
-            self.pretty_print();
         }
 
-        fn falling_edge(&self) {
-            println!("DecodePhase falling edge");
-        }
+        fn falling_edge(&self) {}
 
         fn pretty_print(&self) {
             println!("==================== Decode Phase ====================");
@@ -186,8 +177,6 @@ pub mod proc {
             b: i32,
             pc: i32,
         ) {
-            println!("ExecutePhase rising edge");
-
             self.opcode = opcode;
             self.r1 = r1;
             self.r2 = r2;
@@ -208,13 +197,9 @@ pub mod proc {
             } else {
                 self.b = b;
             }
-
-            self.pretty_print();
         }
 
-        fn falling_edge(&self) {
-            println!("ExecutePhase falling edge");
-        }
+        fn falling_edge(&self) {}
 
         fn pretty_print(&self) {
             println!("==================== Execute Phase ====================");
@@ -293,8 +278,6 @@ pub mod proc {
             br_flag: bool,
             ram: &mut Vec<i32>,
         ) {
-            println!("MemoryPhase rising edge");
-
             self.opcode = opcode;
             self.r1 = r1;
             self.imm = imm;
@@ -328,13 +311,9 @@ pub mod proc {
             if self.br_flag {
                 self.pc += self.imm as i32;
             }
-
-            self.pretty_print();
         }
 
-        fn falling_edge(&self) {
-            println!("MemoryPhase falling edge");
-        }
+        fn falling_edge(&self) {}
 
         fn pretty_print(&self) {
             println!("==================== Memory Phase =====================");
@@ -378,23 +357,18 @@ pub mod proc {
 
     impl WriteBackPhase {
         fn rising_edge(&mut self, opcode: i8, r1: i8, data: i32) {
-            println!("WriteBackPhase rising edge");
-
             self.opcode = opcode;
             self.r1 = r1;
             self.data = data;
+            println!("opcode: {}", opcode);
             if opcode == LDW || opcode < 6 {
                 self.write_en = true;
             } else {
                 self.write_en = false;
             }
-
-            self.pretty_print();
         }
 
-        fn falling_edge(&self) {
-            println!("WriteBackPhase falling edge");
-        }
+        fn falling_edge(&self) {}
 
         fn pretty_print(&self) {
             println!("==================== WriteBack Phase ==================");
@@ -431,6 +405,93 @@ pub mod proc {
     }
 
     impl Processor {
+        pub fn load_program(&self, path: PathBuf) -> Processor {
+            let rom = DataReader::read_rom_from_file(&path, 1024);
+            let mut new_proc = Processor::new_with_rom(rom);
+
+            // FIXME: REMOVE THIS
+            let ram = DataReader::read_rom_from_file(
+                &PathBuf::from("C:\\Git Repositories\\proc_simulator_gui\\ram.dat"),
+                1024,
+            );
+            new_proc.ram = ram;
+
+            new_proc.set_num_rep(self.num_representation.clone());
+            new_proc
+        }
+        pub fn reset(&self) -> Processor {
+            //
+            let rom = self.rom.clone();
+
+            let mut new_proc = Processor::new_with_rom(rom);
+            new_proc.set_num_rep(self.num_representation.clone());
+            new_proc
+        }
+
+        fn new_with_rom(rom: Vec<i32>) -> Processor {
+            let ram = vec![0; 1024];
+            let fetch = FetchPhase { pc: 0, ir: 0 };
+            let decode = DecodePhase {
+                reg_bank: vec![0; 32],
+                ir: 0,
+                opcode: 0,
+                r1: 0,
+                r2: 0,
+                imm: 0,
+                long_imm: 0,
+                r3: 0,
+                r4: 0,
+                r5: 0,
+                a: 0,
+                b: 0,
+                wb: 0,
+                wb_addr: 0,
+                write_en: false,
+                pc: 0,
+            };
+            let execute = ExecutePhase {
+                opcode: 0,
+                r1: 0,
+                r2: 0,
+                imm: 0,
+                long_imm: 0,
+                r3: 0,
+                r4: 0,
+                r5: 0,
+                a: 0,
+                b: 0,
+                pc: 0,
+                br_flag: false,
+            };
+            let memory = MemoryPhase {
+                opcode: 0,
+                r1: 0,
+                imm: 0,
+                long_imm: 0,
+                data: 0,
+                addr: 0,
+                nwe: false,
+                data_out: 0,
+                pc: 0,
+                br_flag: false,
+            };
+            let write_back = WriteBackPhase {
+                opcode: 0,
+                r1: 0,
+                data: 0,
+                write_en: false,
+            };
+            Processor {
+                rom,
+                ram,
+                fetch,
+                decode,
+                execute,
+                memory,
+                write_back,
+                num_representation: "hex".to_string(),
+            }
+        }
         pub fn clock(&mut self) {
             // run the rising edge
             let fetch_clone = self.fetch.clone();
@@ -487,6 +548,72 @@ pub mod proc {
             self.execute.falling_edge();
             self.memory.falling_edge();
             self.write_back.falling_edge();
+        }
+
+        pub fn new_empty_rom() -> Processor {
+            let rom = vec![0; 1024];
+            let ram = vec![0; 1024];
+            let fetch = FetchPhase { pc: 0, ir: 0 };
+            let decode = DecodePhase {
+                reg_bank: vec![0; 32],
+                ir: 0,
+                opcode: 0,
+                r1: 0,
+                r2: 0,
+                imm: 0,
+                long_imm: 0,
+                r3: 0,
+                r4: 0,
+                r5: 0,
+                a: 0,
+                b: 0,
+                wb: 0,
+                wb_addr: 0,
+                write_en: false,
+                pc: 0,
+            };
+            let execute = ExecutePhase {
+                opcode: 0,
+                r1: 0,
+                r2: 0,
+                imm: 0,
+                long_imm: 0,
+                r3: 0,
+                r4: 0,
+                r5: 0,
+                a: 0,
+                b: 0,
+                pc: 0,
+                br_flag: false,
+            };
+            let memory = MemoryPhase {
+                opcode: 0,
+                r1: 0,
+                imm: 0,
+                long_imm: 0,
+                data: 0,
+                addr: 0,
+                nwe: false,
+                data_out: 0,
+                pc: 0,
+                br_flag: false,
+            };
+            let write_back = WriteBackPhase {
+                opcode: 0,
+                r1: 0,
+                data: 0,
+                write_en: false,
+            };
+            Processor {
+                rom,
+                ram,
+                fetch,
+                decode,
+                execute,
+                memory,
+                write_back,
+                num_representation: "hex".to_string(),
+            }
         }
 
         pub fn new(path: PathBuf, num_representation: String) -> Processor {
@@ -1051,7 +1178,7 @@ pub mod proc {
             let reader = std::io::BufReader::new(file);
             for (i, line) in reader.lines().enumerate() {
                 let line = line.unwrap();
-                let value = i32::from_str_radix(&line, 16).unwrap();
+                let value = i32::from_str_radix(&line, 2).unwrap();
                 rom[i] = value;
                 println!("{:032b}", value);
             }
