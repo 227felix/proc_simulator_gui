@@ -1,6 +1,12 @@
 const { invoke } = window.__TAURI__.core;
 const { listen } = window.__TAURI__.event;
 
+const MAX_KEY_LENGTH = 8;
+let num_rep = "hex";
+let max_digits_hex = 8;
+let max_digits_bin = 32;
+let max_digits_dec = 10;
+
 async function clock() {
   let new_state = await invoke("clock_processor", {});
   return new_state;
@@ -11,7 +17,25 @@ function update_fetch(fetch) {
   fetch_div.innerHTML = "";
   for (let key in fetch) {
     let value = fetch[key];
-    fetch_div.innerHTML += `${key}: ${value} <br>`;
+
+    switch (num_rep) {
+      case "hex":
+        value = "&nbsp;".repeat(max_digits_hex - value.length) + value;
+        break;
+      case "bin":
+        value = "&nbsp;".repeat(max_digits_bin - value.length) + value;
+        break;
+      case "dec":
+        value = "&nbsp;".repeat(max_digits_dec - value.length) + value;
+        break;
+    }
+
+    let key_length = key.length;
+
+    let spaces = "&nbsp;".repeat(MAX_KEY_LENGTH - key_length);
+
+    // Hinzufügen des formatierten Inhalts
+    fetch_div.innerHTML += `${key}:${spaces} ${value} <br>`;
   }
 }
 
@@ -23,7 +47,23 @@ function update_decode(decode) {
       continue;
     }
     let value = decode[key];
-    decode_div.innerHTML += `${key}: ${value} <br>`;
+
+    switch (num_rep) {
+      case "hex":
+        value = "&nbsp;".repeat(max_digits_hex - value.length) + value;
+        break;
+      case "bin":
+        value = "&nbsp;".repeat(max_digits_bin - value.length) + value;
+        break;
+      case "dec":
+        value = "&nbsp;".repeat(max_digits_dec - value.length) + value;
+        break;
+    }
+
+    let key_length = key.length;
+
+    let spaces = "&nbsp;".repeat(MAX_KEY_LENGTH - key_length);
+    decode_div.innerHTML += `${key}:${spaces} ${value} <br>`;
   }
 }
 
@@ -32,7 +72,23 @@ function update_execute(execute) {
   execute_div.innerHTML = "";
   for (let key in execute) {
     let value = execute[key];
-    execute_div.innerHTML += `${key}: ${value} <br>`;
+
+    switch (num_rep) {
+      case "hex":
+        value = "&nbsp;".repeat(max_digits_hex - value.length) + value;
+        break;
+      case "bin":
+        value = "&nbsp;".repeat(max_digits_bin - value.length) + value;
+        break;
+      case "dec":
+        value = "&nbsp;".repeat(max_digits_dec - value.length) + value;
+        break;
+    }
+
+    let key_length = key.length;
+
+    let spaces = "&nbsp;".repeat(MAX_KEY_LENGTH - key_length);
+    execute_div.innerHTML += `${key}:${spaces} ${value} <br>`;
   }
 }
 
@@ -41,7 +97,23 @@ function update_memory(memory) {
   memory_div.innerHTML = "";
   for (let key in memory) {
     let value = memory[key];
-    memory_div.innerHTML += `${key}: ${value} <br>`;
+
+    switch (num_rep) {
+      case "hex":
+        value = "&nbsp;".repeat(max_digits_hex - value.length) + value;
+        break;
+      case "bin":
+        value = "&nbsp;".repeat(max_digits_bin - value.length) + value;
+        break;
+      case "dec":
+        value = "&nbsp;".repeat(max_digits_dec - value.length) + value;
+        break;
+    }
+
+    let key_length = key.length;
+
+    let spaces = "&nbsp;".repeat(MAX_KEY_LENGTH - key_length);
+    memory_div.innerHTML += `${key}:${spaces} ${value} <br>`;
   }
 }
 
@@ -50,19 +122,39 @@ function update_write_back(write_back) {
   write_back_div.innerHTML = "";
   for (let key in write_back) {
     let value = write_back[key];
-    write_back_div.innerHTML += `${key}: ${value} <br>`;
+
+    switch (num_rep) {
+      case "hex":
+        value = "&nbsp;".repeat(max_digits_hex - value.length) + value;
+        break;
+      case "bin":
+        value = "&nbsp;".repeat(max_digits_bin - value.length) + value;
+        break;
+      case "dec":
+        value = "&nbsp;".repeat(max_digits_dec - value.length) + value;
+        break;
+    }
+
+    let key_length = key.length;
+
+    let spaces = "&nbsp;".repeat(MAX_KEY_LENGTH - key_length);
+    write_back_div.innerHTML += `${key}:${spaces} ${value} <br>`;
   }
 }
 
-function update_rom(rom) {
+function update_rom(rom, fetch_pc) {
   let rom_div = document.querySelector("#rom-div");
   rom_div.innerHTML = ""; // Leeren des Containers
 
   let fragment = document.createDocumentFragment();
   for (let key in rom) {
     let value = rom[key];
+
     let span = document.createElement("span");
     span.textContent = `${key}: ${value}`;
+    if (key == fetch_pc) {
+      span.id = "highlighted-span";
+    }
     span.style.display = "block"; // Für eine zeilenweise Darstellung
     fragment.appendChild(span);
   }
@@ -103,12 +195,26 @@ function update_state(state) {
   let rom = state.rom;
   let ram = state.ram;
 
+  let base = 2;
+  switch (num_rep) {
+    case "hex":
+      base = 16;
+      break;
+    case "bin":
+      base = 2;
+      break;
+    case "dec":
+      base = 10;
+      break;
+  }
+  let fetch_pc = parseInt(state.fetch.pc, base);
+
   update_fetch(fetch);
   update_decode(decode);
   update_execute(execute);
   update_memory(memory);
   update_write_back(write_back);
-  update_rom(rom);
+  update_rom(rom, fetch_pc);
   update_ram(ram);
   update_reg_bank(reg_bank);
 }
@@ -131,9 +237,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   clock_button.addEventListener("click", async (e) => {
     let proc_div = document.querySelector("#proc-div");
     let new_state = clock().then((new_state) => {
-      console.log(new_state);
-      // proc_div.innerHTML = new_state;
-      // deserialize the new_state
+      //console.log(new_state);
       let new_state_obj = JSON.parse(new_state);
       update_state(new_state_obj);
     });
@@ -143,7 +247,10 @@ window.addEventListener("DOMContentLoaded", async () => {
   representation_select.addEventListener("change", async (e) => {
     if (e.target.name === "num-representation") {
       let representation = e.target.value;
-      await set_num_representation(representation);
+      num_rep = representation;
+      await set_num_representation(representation).then(() => {
+        console.log(num_rep);
+      });
     }
   });
 });

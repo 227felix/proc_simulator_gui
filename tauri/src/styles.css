@@ -158,9 +158,6 @@ button {
   overflow: auto;
 }
 
-#fetch-div {
-}
-
 #mem-title-wrapper {
   display: flex;
 }
@@ -201,4 +198,8 @@ button {
   background-color: #f6f6f6;
   color: #0f0f0f;
   width: 100%;
+}
+
+#highlighted-span {
+  background-color: #2464db;
 }
