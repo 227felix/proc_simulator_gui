@@ -58,6 +58,7 @@ function update_rom(rom) {
 
   let fragment = document.createDocumentFragment();
   for (let key in rom) {
+    
     let value = rom[key];
     let span = document.createElement("span");
     span.textContent = `${key}: ${value}`;

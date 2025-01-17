@@ -154,25 +154,32 @@ button {
 #fetch-div {
 }
 
+#mem-title-wrapper {
+  display: flex;
+}
+#reg-file-title,
+#rom-title,
+#ram-title {
+  width: 33%;
+  text-align: center;
+}
+
 #rom-div,
 #ram-div,
 #register-div {
-  font-family: monospace; /* Für besser lesbare Speicherwerte */
   white-space: nowrap; /* verhindert Zeilenumbruch innerhalb von Speicherwerten */
 
-  overflow-y: auto;
+  overflow-y: scroll;
   overflow-x: hidden;
   position: relative;
-  box-sizing: border-box;
   width: 33%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  display: block;
+  text-align: center;
+  height: 100%;
 }
 
 #mem-wrapper {
   height: 25vh;
   padding: 0.5vh;
   display: flex;
-  background-color: #080808;
 }
