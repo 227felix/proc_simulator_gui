@@ -427,6 +427,7 @@ pub mod proc {
         execute: ExecutePhase,
         memory: MemoryPhase,
         write_back: WriteBackPhase,
+        num_representation: String,
     }
 
     impl Processor {
@@ -488,7 +489,7 @@ pub mod proc {
             self.write_back.falling_edge();
         }
 
-        pub fn new(path: PathBuf) -> Processor {
+        pub fn new(path: PathBuf, num_representation: String) -> Processor {
             let rom = DataReader::read_rom_from_file(&path, 1024);
             let ram = vec![0; 1024];
             let fetch = FetchPhase { pc: 0, ir: 0 };
@@ -533,7 +534,7 @@ pub mod proc {
                 addr: 0,
                 nwe: false,
                 data_out: 0,
-                pc: -1,
+                pc: 0,
                 br_flag: false,
             };
             let write_back = WriteBackPhase {
@@ -550,12 +551,452 @@ pub mod proc {
                 execute,
                 memory,
                 write_back,
+                num_representation,
             }
         }
 
-        pub fn get_state_serialized(&self) -> String {
-            serde_json::to_string(&self).unwrap()
+        pub fn set_num_rep(&mut self, representation: String) {
+            self.num_representation = representation;
         }
+
+        pub fn get_state_serialized(&self) -> String {
+            let serialized = match self.num_representation.as_str() {
+                "hex" => serde_json::to_string(&self.to_hex()).unwrap(),
+                "dec" => serde_json::to_string(&self.to_dec()).unwrap(),
+                "bin" => serde_json::to_string(&self.to_bin()).unwrap(),
+                _ => serde_json::to_string(&self).unwrap(),
+            };
+            serialized
+        }
+
+        fn to_hex(&self) -> ProcessorHex {
+            ProcessorHex {
+                rom: self.rom.iter().map(|x| format!("{:08x}", x)).collect(),
+                ram: self.ram.iter().map(|x| format!("{:08x}", x)).collect(),
+                fetch: FetchPhaseHex {
+                    pc: format!("{:08x}", self.fetch.pc),
+                    ir: format!("{:08x}", self.fetch.ir),
+                },
+                decode: DecodePhaseHex {
+                    reg_bank: self
+                        .decode
+                        .reg_bank
+                        .iter()
+                        .map(|x| format!("{:08x}", x))
+                        .collect(),
+                    ir: format!("{:08x}", self.decode.ir),
+                    opcode: format!("{:02x}", self.decode.opcode),
+                    r1: format!("{:02x}", self.decode.r1),
+                    r2: format!("{:02x}", self.decode.r2),
+                    imm: format!("{:04x}", self.decode.imm),
+                    long_imm: format!("{:08x}", self.decode.long_imm),
+                    r3: format!("{:02x}", self.decode.r3),
+                    r4: format!("{:02x}", self.decode.r4),
+                    r5: format!("{:02x}", self.decode.r5),
+                    a: format!("{:08x}", self.decode.a),
+                    b: format!("{:08x}", self.decode.b),
+                    wb: format!("{:08x}", self.decode.wb),
+                    wb_addr: format!("{:08x}", self.decode.wb_addr),
+                    write_en: format!("{:01x}", self.decode.write_en as i8),
+                    pc: format!("{:08x}", self.decode.pc),
+                },
+                execute: ExecutePhaseHex {
+                    opcode: format!("{:02x}", self.execute.opcode),
+                    r1: format!("{:02x}", self.execute.r1),
+                    r2: format!("{:02x}", self.execute.r2),
+                    imm: format!("{:04x}", self.execute.imm),
+                    long_imm: format!("{:08x}", self.execute.long_imm),
+                    r3: format!("{:02x}", self.execute.r3),
+                    r4: format!("{:02x}", self.execute.r4),
+                    r5: format!("{:02x}", self.execute.r5),
+                    a: format!("{:08x}", self.execute.a),
+                    b: format!("{:08x}", self.execute.b),
+                    pc: format!("{:08x}", self.execute.pc),
+                    br_flag: format!("{:01x}", self.execute.br_flag as i8),
+                },
+                memory: MemoryPhaseHex {
+                    opcode: format!("{:02x}", self.memory.opcode),
+                    r1: format!("{:02x}", self.memory.r1),
+                    imm: format!("{:04x}", self.memory.imm),
+                    long_imm: format!("{:08x}", self.memory.long_imm),
+                    data: format!("{:08x}", self.memory.data),
+                    addr: format!("{:08x}", self.memory.addr),
+                    nwe: format!("{:01x}", self.memory.nwe as i8),
+                    data_out: format!("{:08x}", self.memory.data_out),
+                    pc: format!("{:08x}", self.memory.pc),
+                    br_flag: format!("{:01x}", self.memory.br_flag as i8),
+                },
+                write_back: WriteBackPhaseHex {
+                    opcode: format!("{:02x}", self.write_back.opcode),
+                    r1: format!("{:02x}", self.write_back.r1),
+                    data: format!("{:08x}", self.write_back.data),
+                    write_en: format!("{:01x}", self.write_back.write_en as i8),
+                },
+                num_representation: self.num_representation.clone(),
+            }
+        }
+
+        fn to_dec(&self) -> ProcessorDec {
+            ProcessorDec {
+                rom: self.rom.iter().map(|x| format!("{:010}", x)).collect(),
+                ram: self.ram.iter().map(|x| format!("{:010}", x)).collect(),
+                fetch: FetchPhaseDec {
+                    pc: format!("{:010}", self.fetch.pc),
+                    ir: format!("{:010}", self.fetch.ir),
+                },
+                decode: DecodePhaseDec {
+                    reg_bank: self
+                        .decode
+                        .reg_bank
+                        .iter()
+                        .map(|x| format!("{:010}", x))
+                        .collect(),
+                    ir: format!("{:010}", self.decode.ir),
+                    opcode: format!("{:03}", self.decode.opcode),
+                    r1: format!("{:03}", self.decode.r1),
+                    r2: format!("{:03}", self.decode.r2),
+                    imm: format!("{:05}", self.decode.imm),
+                    long_imm: format!("{:010}", self.decode.long_imm),
+                    r3: format!("{:03}", self.decode.r3),
+                    r4: format!("{:03}", self.decode.r4),
+                    r5: format!("{:03}", self.decode.r5),
+                    a: format!("{:010}", self.decode.a),
+                    b: format!("{:010}", self.decode.b),
+                    wb: format!("{:010}", self.decode.wb),
+                    wb_addr: format!("{:010}", self.decode.wb_addr),
+                    write_en: format!("{:01}", self.decode.write_en as i8),
+                    pc: format!("{:010}", self.decode.pc),
+                },
+                execute: ExecutePhaseDec {
+                    opcode: format!("{:03}", self.execute.opcode),
+                    r1: format!("{:03}", self.execute.r1),
+                    r2: format!("{:03}", self.execute.r2),
+                    imm: format!("{:05}", self.execute.imm),
+                    long_imm: format!("{:010}", self.execute.long_imm),
+                    r3: format!("{:03}", self.execute.r3),
+                    r4: format!("{:03}", self.execute.r4),
+                    r5: format!("{:03}", self.execute.r5),
+                    a: format!("{:010}", self.execute.a),
+                    b: format!("{:010}", self.execute.b),
+                    pc: format!("{:010}", self.execute.pc),
+                    br_flag: format!("{:01}", self.execute.br_flag as i8),
+                },
+                memory: MemoryPhaseDec {
+                    opcode: format!("{:03}", self.memory.opcode),
+                    r1: format!("{:03}", self.memory.r1),
+                    imm: format!("{:05}", self.memory.imm),
+                    long_imm: format!("{:010}", self.memory.long_imm),
+                    data: format!("{:010}", self.memory.data),
+                    addr: format!("{:010}", self.memory.addr),
+                    nwe: format!("{:01}", self.memory.nwe as i8),
+                    data_out: format!("{:010}", self.memory.data_out),
+                    pc: format!("{:010}", self.memory.pc),
+                    br_flag: format!("{:01}", self.memory.br_flag as i8),
+                },
+                write_back: WriteBackPhaseDec {
+                    opcode: format!("{:03}", self.write_back.opcode),
+                    r1: format!("{:03}", self.write_back.r1),
+                    data: format!("{:010}", self.write_back.data),
+                    write_en: format!("{:01}", self.write_back.write_en as i8),
+                },
+                num_representation: self.num_representation.clone(),
+            }
+        }
+
+        fn to_bin(&self) -> ProcessorBin {
+            ProcessorBin {
+                rom: self.rom.iter().map(|x| format!("{:032b}", x)).collect(),
+                ram: self.ram.iter().map(|x| format!("{:032b}", x)).collect(),
+                fetch: FetchPhaseBin {
+                    pc: format!("{:032b}", self.fetch.pc),
+                    ir: format!("{:032b}", self.fetch.ir),
+                },
+                decode: DecodePhaseBin {
+                    reg_bank: self
+                        .decode
+                        .reg_bank
+                        .iter()
+                        .map(|x| format!("{:032b}", x))
+                        .collect(),
+                    ir: format!("{:032b}", self.decode.ir),
+                    opcode: format!("{:08b}", self.decode.opcode),
+                    r1: format!("{:08b}", self.decode.r1),
+                    r2: format!("{:08b}", self.decode.r2),
+                    imm: format!("{:016b}", self.decode.imm),
+                    long_imm: format!("{:032b}", self.decode.long_imm),
+                    r3: format!("{:08b}", self.decode.r3),
+                    r4: format!("{:08b}", self.decode.r4),
+                    r5: format!("{:08b}", self.decode.r5),
+                    a: format!("{:032b}", self.decode.a),
+                    b: format!("{:032b}", self.decode.b),
+                    wb: format!("{:032b}", self.decode.wb),
+                    wb_addr: format!("{:032b}", self.decode.wb_addr),
+                    write_en: format!("{:01b}", self.decode.write_en as i8),
+                    pc: format!("{:032b}", self.decode.pc),
+                },
+                execute: ExecutePhaseBin {
+                    opcode: format!("{:08b}", self.execute.opcode),
+                    r1: format!("{:08b}", self.execute.r1),
+                    r2: format!("{:08b}", self.execute.r2),
+                    imm: format!("{:016b}", self.execute.imm),
+                    long_imm: format!("{:032b}", self.execute.long_imm),
+                    r3: format!("{:08b}", self.execute.r3),
+                    r4: format!("{:08b}", self.execute.r4),
+                    r5: format!("{:08b}", self.execute.r5),
+                    a: format!("{:032b}", self.execute.a),
+                    b: format!("{:032b}", self.execute.b),
+                    pc: format!("{:032b}", self.execute.pc),
+                    br_flag: format!("{:01b}", self.execute.br_flag as i8),
+                },
+                memory: MemoryPhaseBin {
+                    opcode: format!("{:08b}", self.memory.opcode),
+                    r1: format!("{:08b}", self.memory.r1),
+                    imm: format!("{:016b}", self.memory.imm),
+                    long_imm: format!("{:032b}", self.memory.long_imm),
+                    data: format!("{:032b}", self.memory.data),
+                    addr: format!("{:032b}", self.memory.addr),
+                    nwe: format!("{:01b}", self.memory.nwe as i8),
+                    data_out: format!("{:032b}", self.memory.data_out),
+                    pc: format!("{:032b}", self.memory.pc),
+                    br_flag: format!("{:01b}", self.memory.br_flag as i8),
+                },
+                write_back: WriteBackPhaseBin {
+                    opcode: format!("{:08b}", self.write_back.opcode),
+                    r1: format!("{:08b}", self.write_back.r1),
+                    data: format!("{:032b}", self.write_back.data),
+                    write_en: format!("{:01b}", self.write_back.write_en as i8),
+                },
+                num_representation: self.num_representation.clone(),
+            }
+        }
+    }
+
+    #[derive(Serialize)]
+    struct ProcessorHex {
+        rom: Vec<String>,
+        ram: Vec<String>,
+        fetch: FetchPhaseHex,
+        decode: DecodePhaseHex,
+        execute: ExecutePhaseHex,
+        memory: MemoryPhaseHex,
+        write_back: WriteBackPhaseHex,
+        num_representation: String,
+    }
+
+    #[derive(Serialize)]
+    struct FetchPhaseHex {
+        pc: String,
+        ir: String,
+    }
+
+    #[derive(Serialize)]
+    struct DecodePhaseHex {
+        reg_bank: Vec<String>,
+        ir: String,
+        opcode: String,
+        r1: String,
+        r2: String,
+        imm: String,
+        long_imm: String,
+        r3: String,
+        r4: String,
+        r5: String,
+        a: String,
+        b: String,
+        wb: String,
+        wb_addr: String,
+        write_en: String,
+        pc: String,
+    }
+
+    #[derive(Serialize)]
+    struct ExecutePhaseHex {
+        opcode: String,
+        r1: String,
+        r2: String,
+        imm: String,
+        long_imm: String,
+        r3: String,
+        r4: String,
+        r5: String,
+        a: String,
+        b: String,
+        pc: String,
+        br_flag: String,
+    }
+
+    #[derive(Serialize)]
+    struct MemoryPhaseHex {
+        opcode: String,
+        r1: String,
+        imm: String,
+        long_imm: String,
+        data: String,
+        addr: String,
+        nwe: String,
+        data_out: String,
+        pc: String,
+        br_flag: String,
+    }
+
+    #[derive(Serialize)]
+    struct WriteBackPhaseHex {
+        opcode: String,
+        r1: String,
+        data: String,
+        write_en: String,
+    }
+
+    #[derive(Serialize)]
+    struct ProcessorDec {
+        rom: Vec<String>,
+        ram: Vec<String>,
+        fetch: FetchPhaseDec,
+        decode: DecodePhaseDec,
+        execute: ExecutePhaseDec,
+        memory: MemoryPhaseDec,
+        write_back: WriteBackPhaseDec,
+        num_representation: String,
+    }
+
+    #[derive(Serialize)]
+    struct FetchPhaseDec {
+        pc: String,
+        ir: String,
+    }
+
+    #[derive(Serialize)]
+    struct DecodePhaseDec {
+        reg_bank: Vec<String>,
+        ir: String,
+        opcode: String,
+        r1: String,
+        r2: String,
+        imm: String,
+        long_imm: String,
+        r3: String,
+        r4: String,
+        r5: String,
+        a: String,
+        b: String,
+        wb: String,
+        wb_addr: String,
+        write_en: String,
+        pc: String,
+    }
+
+    #[derive(Serialize)]
+    struct ExecutePhaseDec {
+        opcode: String,
+        r1: String,
+        r2: String,
+        imm: String,
+        long_imm: String,
+        r3: String,
+        r4: String,
+        r5: String,
+        a: String,
+        b: String,
+        pc: String,
+        br_flag: String,
+    }
+
+    #[derive(Serialize)]
+    struct MemoryPhaseDec {
+        opcode: String,
+        r1: String,
+        imm: String,
+        long_imm: String,
+        data: String,
+        addr: String,
+        nwe: String,
+        data_out: String,
+        pc: String,
+        br_flag: String,
+    }
+
+    #[derive(Serialize)]
+    struct WriteBackPhaseDec {
+        opcode: String,
+        r1: String,
+        data: String,
+        write_en: String,
+    }
+
+    #[derive(Serialize)]
+    struct ProcessorBin {
+        rom: Vec<String>,
+        ram: Vec<String>,
+        fetch: FetchPhaseBin,
+        decode: DecodePhaseBin,
+        execute: ExecutePhaseBin,
+        memory: MemoryPhaseBin,
+        write_back: WriteBackPhaseBin,
+        num_representation: String,
+    }
+
+    #[derive(Serialize)]
+    struct FetchPhaseBin {
+        pc: String,
+        ir: String,
+    }
+
+    #[derive(Serialize)]
+    struct DecodePhaseBin {
+        reg_bank: Vec<String>,
+        ir: String,
+        opcode: String,
+        r1: String,
+        r2: String,
+        imm: String,
+        long_imm: String,
+        r3: String,
+        r4: String,
+        r5: String,
+        a: String,
+        b: String,
+        wb: String,
+        wb_addr: String,
+        write_en: String,
+        pc: String,
+    }
+
+    #[derive(Serialize)]
+    struct ExecutePhaseBin {
+        opcode: String,
+        r1: String,
+        r2: String,
+        imm: String,
+        long_imm: String,
+        r3: String,
+        r4: String,
+        r5: String,
+        a: String,
+        b: String,
+        pc: String,
+        br_flag: String,
+    }
+
+    #[derive(Serialize)]
+    struct MemoryPhaseBin {
+        opcode: String,
+        r1: String,
+        imm: String,
+        long_imm: String,
+        data: String,
+        addr: String,
+        nwe: String,
+        data_out: String,
+        pc: String,
+        br_flag: String,
+    }
+
+    #[derive(Serialize)]
+    struct WriteBackPhaseBin {
+        opcode: String,
+        r1: String,
+        data: String,
+        write_en: String,
     }
 
     struct Alu;

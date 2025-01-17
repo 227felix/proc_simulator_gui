@@ -1,4 +1,6 @@
-const { invoke } = window.__TAURI__.tauri;
+const { invoke } = window.__TAURI__.core;
+const { listen } = window.__TAURI__.event;
+
 async function clock() {
   let new_state = await invoke("clock_processor", {});
   return new_state;
@@ -58,7 +60,6 @@ function update_rom(rom) {
 
   let fragment = document.createDocumentFragment();
   for (let key in rom) {
-    
     let value = rom[key];
     let span = document.createElement("span");
     span.textContent = `${key}: ${value}`;
@@ -92,11 +93,39 @@ function update_reg_bank(reg_bank) {
   }
 }
 
+function update_state(state) {
+  let fetch = state.fetch;
+  let decode = state.decode;
+  let reg_bank = state.decode.reg_bank;
+  let execute = state.execute;
+  let memory = state.memory;
+  let write_back = state.write_back;
+  let rom = state.rom;
+  let ram = state.ram;
 
+  update_fetch(fetch);
+  update_decode(decode);
+  update_execute(execute);
+  update_memory(memory);
+  update_write_back(write_back);
+  update_rom(rom);
+  update_ram(ram);
+  update_reg_bank(reg_bank);
+}
 
+async function set_num_representation(representation) {
+  await invoke("set_num_representation", { representation });
+  let new_state = await invoke("get_state", {});
+  let new_state_obj = JSON.parse(new_state);
+  update_state(new_state_obj);
+}
 
+window.addEventListener("DOMContentLoaded", async () => {
+  let new_state = await invoke("get_state", {}).then((new_state) => {
+    let new_state_obj = JSON.parse(new_state);
 
-window.addEventListener("DOMContentLoaded", () => {
+    update_state(new_state_obj);
+  });
 
   let clock_button = document.querySelector("#clock-button");
   clock_button.addEventListener("click", async (e) => {
@@ -106,27 +135,15 @@ window.addEventListener("DOMContentLoaded", () => {
       // proc_div.innerHTML = new_state;
       // deserialize the new_state
       let new_state_obj = JSON.parse(new_state);
-      console.log(new_state_obj);
-      let fetch = new_state_obj.fetch;
-      let decode = new_state_obj.decode;
-      let reg_bank = new_state_obj.decode.reg_bank;
-      let execute = new_state_obj.execute;
-      let memory = new_state_obj.memory;
-      let write_back = new_state_obj.write_back;
-      let rom = new_state_obj.rom;
-      let ram = new_state_obj.ram;
-
-      console.log(rom);
-
-      update_fetch(fetch);
-      update_decode(decode);
-      update_execute(execute);
-      update_memory(memory);
-      update_write_back(write_back);
-      update_rom(rom);
-      update_ram(ram);
-      update_reg_bank(reg_bank);
-
+      update_state(new_state_obj);
     });
+  });
+
+  let representation_select = document.querySelector("#representation-buttons");
+  representation_select.addEventListener("change", async (e) => {
+    if (e.target.name === "num-representation") {
+      let representation = e.target.value;
+      await set_num_representation(representation);
+    }
   });
 });

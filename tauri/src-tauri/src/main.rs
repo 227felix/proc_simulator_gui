@@ -2,8 +2,8 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use serde::Serialize;
-use tauri::State;
-
+use tauri::{Manager, State};
+use tauri_plugin_dialog::DialogExt;
 mod proc;
 use std::{
     path::PathBuf,
@@ -37,20 +37,50 @@ fn clock_processor(state: State<'_, Arc<ProcessorState>>) -> String {
     new_state
 }
 
+#[tauri::command]
+fn get_state(state: State<'_, Arc<ProcessorState>>) -> String {
+    let processor = state.processor.lock().unwrap();
+    processor.get_state_serialized()
+}
+
+#[tauri::command]
+fn set_num_representation(state: State<'_, Arc<ProcessorState>>, representation: String) {
+    let mut processor = state.processor.lock().unwrap();
+    processor.set_num_rep(representation);
+}
+
 fn main() {
-    let file_path = tauri::api::dialog::blocking::FileDialogBuilder::new()
-        .pick_file()
-        .expect("No file selected");
-
-    let proc = Processor::new(file_path);
-
-    let processor_state = ProcessorState {
-        processor: Mutex::new(proc),
-    };
-
     tauri::Builder::default()
-        .manage(Arc::new(processor_state)) // Correctly manage the ProcessorState
-        .invoke_handler(tauri::generate_handler![greet, file_test, clock_processor])
+        .setup(|app| {
+            let file_path = app
+                .dialog()
+                .file()
+                .blocking_pick_file()
+                .expect("Failed to open file")
+                .into_path()
+                .unwrap();
+
+            // let file_path = PathBuf::from("C:\\Git Repositories\\proc_simulator\\src\\rom.dat");
+
+            let proc = Processor::new(file_path, "hex".to_string());
+
+            let processor_state = ProcessorState {
+                processor: Mutex::new(proc),
+            };
+
+            app.manage(Arc::new(processor_state)); // Correctly manage the ProcessorState
+
+            Ok(())
+        })
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_shell::init())
+        .invoke_handler(tauri::generate_handler![
+            greet,
+            file_test,
+            clock_processor,
+            get_state,
+            set_num_representation
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

@@ -3,7 +3,7 @@
 }
 :root {
   font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
-  font-size: 16px;
+  font-size: 14px;
   line-height: 24px;
   font-weight: 400;
 
@@ -130,6 +130,12 @@ button {
   max-height: 50vh;
 }
 
+#representation-buttons {
+  display: flex;
+  justify-content: center;
+  margin-top: 1em;
+}
+
 #clock-p {
   display: flex;
   justify-content: center;
@@ -140,15 +146,16 @@ button {
 }
 
 #pipeline-wrapper {
-  height: 65vh;
+  height: 45vh;
   display: flex;
 }
 .pipeline {
-  height: 98.46%;
+  height: 100%;
   width: 20%;
   box-shadow: inset 0 0 0 1px rgb(194, 194, 194);
   margin: 0;
   padding: 0.5vh;
+  overflow: auto;
 }
 
 #fetch-div {
@@ -179,7 +186,19 @@ button {
 }
 
 #mem-wrapper {
-  height: 25vh;
+  height: 40vh;
   padding: 0.5vh;
   display: flex;
+}
+
+.dark {
+  background-color: #0f0f0f;
+  color: #f6f6f6;
+  width: 100%;
+}
+
+.light {
+  background-color: #f6f6f6;
+  color: #0f0f0f;
+  width: 100%;
 }
