@@ -133,12 +133,14 @@ button {
 #representation-buttons {
   display: flex;
   justify-content: center;
-  margin-top: 1em;
+  margin: 1vh;
 }
 
 #clock-p {
   display: flex;
   justify-content: center;
+  margin: 0;
+  padding: 1vh;
 }
 
 #proc-div {
@@ -146,7 +148,7 @@ button {
 }
 
 #pipeline-wrapper {
-  height: 45vh;
+  height: 41vh;
   display: flex;
 }
 .pipeline {
@@ -200,6 +202,9 @@ button {
   width: 100%;
 }
 
-#highlighted-span {
+#highlighted {
   background-color: #2464db;
+}
+.mem-table {
+  width: 100%;
 }

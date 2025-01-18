@@ -17,3 +17,7 @@ tauri-plugin-dialog = "2"
 
 [features]
 custom-protocol = ["tauri/custom-protocol"]
+
+
+[profile.dev]
+opt-level = 0

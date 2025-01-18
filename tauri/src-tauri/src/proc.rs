@@ -33,16 +33,16 @@ pub mod proc {
 
     #[derive(Clone, Serialize)]
     struct DecodePhase {
-        reg_bank: Vec<i32>,
-        ir: i32,
         opcode: i8,
         r1: i8,
         r2: i8,
-        imm: i16,
-        long_imm: i32,
         r3: i8,
         r4: i8,
         r5: i8,
+        imm: i16,
+        long_imm: i32,
+        ir: i32,
+        reg_bank: Vec<i32>,
         a: i32,
         b: i32,
         wb: i32,
@@ -151,11 +151,11 @@ pub mod proc {
         opcode: i8,
         r1: i8,
         r2: i8,
-        imm: i16,
-        long_imm: i32,
         r3: i8,
         r4: i8,
         r5: i8,
+        imm: i16,
+        long_imm: i32,
         a: i32,
         b: i32,
         pc: i32,
@@ -191,11 +191,16 @@ pub mod proc {
             // do the alu_op
             let (alu_out, br_flag) = Alu::op(opcode, a, b, imm, pc);
             self.br_flag = br_flag;
-            if opcode < 21 {
+            if opcode < 6 {
                 //TODO fix this
                 self.b = alu_out;
+                // r3 ist die ziel register adresse für alu op
+                self.r1 = r3;
             } else {
                 self.b = b;
+            }
+            if opcode == MOVI {
+                self.b = imm as i32;
             }
         }
 
@@ -293,6 +298,10 @@ pub mod proc {
                 self.nwe = true;
             }
             if self.nwe {
+                if self.addr as usize >= ram.len() {
+                    // FIXME
+                    self.addr = 0;
+                }
                 self.data_out = ram[self.addr as usize]; // FIXME: eventuell sollte man den RAM als eigene Struktur haben um die Verzögerung korrekt darzustellen
             } else {
                 ram[self.addr as usize] = self.data;
@@ -361,7 +370,7 @@ pub mod proc {
             self.r1 = r1;
             self.data = data;
             println!("opcode: {}", opcode);
-            if opcode == LDW || opcode < 6 {
+            if opcode == LDW || opcode == MOVI || opcode < 6 {
                 self.write_en = true;
             } else {
                 self.write_en = false;
@@ -529,8 +538,8 @@ pub mod proc {
                 execute_clone.get_r1(),
                 execute_clone.get_imm(),
                 execute_clone.get_long_imm(),
-                execute_clone.get_a(),
                 execute_clone.get_b(),
+                execute_clone.get_a(),
                 execute_clone.get_pc(),
                 execute_clone.get_br_flag(),
                 &mut self.ram,
@@ -705,21 +714,21 @@ pub mod proc {
                     ir: format!("{:08x}", self.fetch.ir),
                 },
                 decode: DecodePhaseHex {
+                    opcode: format!("{:02x}", self.decode.opcode),
+                    r1: format!("{:02x}", self.decode.r1),
+                    r2: format!("{:02x}", self.decode.r2),
+                    r3: format!("{:02x}", self.decode.r3),
+                    r4: format!("{:02x}", self.decode.r4),
+                    r5: format!("{:02x}", self.decode.r5),
+                    imm: format!("{:04x}", self.decode.imm),
+                    long_imm: format!("{:08x}", self.decode.long_imm),
+                    ir: format!("{:08x}", self.decode.ir),
                     reg_bank: self
                         .decode
                         .reg_bank
                         .iter()
                         .map(|x| format!("{:08x}", x))
                         .collect(),
-                    ir: format!("{:08x}", self.decode.ir),
-                    opcode: format!("{:02x}", self.decode.opcode),
-                    r1: format!("{:02x}", self.decode.r1),
-                    r2: format!("{:02x}", self.decode.r2),
-                    imm: format!("{:04x}", self.decode.imm),
-                    long_imm: format!("{:08x}", self.decode.long_imm),
-                    r3: format!("{:02x}", self.decode.r3),
-                    r4: format!("{:02x}", self.decode.r4),
-                    r5: format!("{:02x}", self.decode.r5),
                     a: format!("{:08x}", self.decode.a),
                     b: format!("{:08x}", self.decode.b),
                     wb: format!("{:08x}", self.decode.wb),
@@ -731,11 +740,11 @@ pub mod proc {
                     opcode: format!("{:02x}", self.execute.opcode),
                     r1: format!("{:02x}", self.execute.r1),
                     r2: format!("{:02x}", self.execute.r2),
-                    imm: format!("{:04x}", self.execute.imm),
-                    long_imm: format!("{:08x}", self.execute.long_imm),
                     r3: format!("{:02x}", self.execute.r3),
                     r4: format!("{:02x}", self.execute.r4),
                     r5: format!("{:02x}", self.execute.r5),
+                    imm: format!("{:04x}", self.execute.imm),
+                    long_imm: format!("{:08x}", self.execute.long_imm),
                     a: format!("{:08x}", self.execute.a),
                     b: format!("{:08x}", self.execute.b),
                     pc: format!("{:08x}", self.execute.pc),
@@ -772,21 +781,21 @@ pub mod proc {
                     ir: format!("{:010}", self.fetch.ir),
                 },
                 decode: DecodePhaseDec {
+                    opcode: format!("{:03}", self.decode.opcode),
+                    r1: format!("{:03}", self.decode.r1),
+                    r2: format!("{:03}", self.decode.r2),
+                    r3: format!("{:03}", self.decode.r3),
+                    r4: format!("{:03}", self.decode.r4),
+                    r5: format!("{:03}", self.decode.r5),
+                    imm: format!("{:05}", self.decode.imm),
+                    long_imm: format!("{:010}", self.decode.long_imm),
+                    ir: format!("{:010}", self.decode.ir),
                     reg_bank: self
                         .decode
                         .reg_bank
                         .iter()
                         .map(|x| format!("{:010}", x))
                         .collect(),
-                    ir: format!("{:010}", self.decode.ir),
-                    opcode: format!("{:03}", self.decode.opcode),
-                    r1: format!("{:03}", self.decode.r1),
-                    r2: format!("{:03}", self.decode.r2),
-                    imm: format!("{:05}", self.decode.imm),
-                    long_imm: format!("{:010}", self.decode.long_imm),
-                    r3: format!("{:03}", self.decode.r3),
-                    r4: format!("{:03}", self.decode.r4),
-                    r5: format!("{:03}", self.decode.r5),
                     a: format!("{:010}", self.decode.a),
                     b: format!("{:010}", self.decode.b),
                     wb: format!("{:010}", self.decode.wb),
@@ -798,11 +807,11 @@ pub mod proc {
                     opcode: format!("{:03}", self.execute.opcode),
                     r1: format!("{:03}", self.execute.r1),
                     r2: format!("{:03}", self.execute.r2),
-                    imm: format!("{:05}", self.execute.imm),
-                    long_imm: format!("{:010}", self.execute.long_imm),
                     r3: format!("{:03}", self.execute.r3),
                     r4: format!("{:03}", self.execute.r4),
                     r5: format!("{:03}", self.execute.r5),
+                    imm: format!("{:05}", self.execute.imm),
+                    long_imm: format!("{:010}", self.execute.long_imm),
                     a: format!("{:010}", self.execute.a),
                     b: format!("{:010}", self.execute.b),
                     pc: format!("{:010}", self.execute.pc),
@@ -839,21 +848,21 @@ pub mod proc {
                     ir: format!("{:032b}", self.fetch.ir),
                 },
                 decode: DecodePhaseBin {
+                    opcode: format!("{:08b}", self.decode.opcode),
+                    r1: format!("{:08b}", self.decode.r1),
+                    r2: format!("{:08b}", self.decode.r2),
+                    r3: format!("{:08b}", self.decode.r3),
+                    r4: format!("{:08b}", self.decode.r4),
+                    r5: format!("{:08b}", self.decode.r5),
+                    imm: format!("{:016b}", self.decode.imm),
+                    long_imm: format!("{:032b}", self.decode.long_imm),
+                    ir: format!("{:032b}", self.decode.ir),
                     reg_bank: self
                         .decode
                         .reg_bank
                         .iter()
                         .map(|x| format!("{:032b}", x))
                         .collect(),
-                    ir: format!("{:032b}", self.decode.ir),
-                    opcode: format!("{:08b}", self.decode.opcode),
-                    r1: format!("{:08b}", self.decode.r1),
-                    r2: format!("{:08b}", self.decode.r2),
-                    imm: format!("{:016b}", self.decode.imm),
-                    long_imm: format!("{:032b}", self.decode.long_imm),
-                    r3: format!("{:08b}", self.decode.r3),
-                    r4: format!("{:08b}", self.decode.r4),
-                    r5: format!("{:08b}", self.decode.r5),
                     a: format!("{:032b}", self.decode.a),
                     b: format!("{:032b}", self.decode.b),
                     wb: format!("{:032b}", self.decode.wb),
@@ -865,11 +874,11 @@ pub mod proc {
                     opcode: format!("{:08b}", self.execute.opcode),
                     r1: format!("{:08b}", self.execute.r1),
                     r2: format!("{:08b}", self.execute.r2),
-                    imm: format!("{:016b}", self.execute.imm),
-                    long_imm: format!("{:032b}", self.execute.long_imm),
                     r3: format!("{:08b}", self.execute.r3),
                     r4: format!("{:08b}", self.execute.r4),
                     r5: format!("{:08b}", self.execute.r5),
+                    imm: format!("{:016b}", self.execute.imm),
+                    long_imm: format!("{:032b}", self.execute.long_imm),
                     a: format!("{:032b}", self.execute.a),
                     b: format!("{:032b}", self.execute.b),
                     pc: format!("{:032b}", self.execute.pc),
@@ -918,16 +927,16 @@ pub mod proc {
 
     #[derive(Serialize)]
     struct DecodePhaseHex {
-        reg_bank: Vec<String>,
-        ir: String,
         opcode: String,
         r1: String,
         r2: String,
-        imm: String,
-        long_imm: String,
         r3: String,
         r4: String,
         r5: String,
+        imm: String,
+        long_imm: String,
+        ir: String,
+        reg_bank: Vec<String>,
         a: String,
         b: String,
         wb: String,
@@ -941,11 +950,11 @@ pub mod proc {
         opcode: String,
         r1: String,
         r2: String,
-        imm: String,
-        long_imm: String,
         r3: String,
         r4: String,
         r5: String,
+        imm: String,
+        long_imm: String,
         a: String,
         b: String,
         pc: String,
@@ -994,16 +1003,16 @@ pub mod proc {
 
     #[derive(Serialize)]
     struct DecodePhaseDec {
-        reg_bank: Vec<String>,
-        ir: String,
         opcode: String,
         r1: String,
         r2: String,
-        imm: String,
-        long_imm: String,
         r3: String,
         r4: String,
         r5: String,
+        imm: String,
+        long_imm: String,
+        ir: String,
+        reg_bank: Vec<String>,
         a: String,
         b: String,
         wb: String,
@@ -1017,11 +1026,11 @@ pub mod proc {
         opcode: String,
         r1: String,
         r2: String,
-        imm: String,
-        long_imm: String,
         r3: String,
         r4: String,
         r5: String,
+        imm: String,
+        long_imm: String,
         a: String,
         b: String,
         pc: String,
@@ -1070,16 +1079,16 @@ pub mod proc {
 
     #[derive(Serialize)]
     struct DecodePhaseBin {
-        reg_bank: Vec<String>,
-        ir: String,
         opcode: String,
         r1: String,
         r2: String,
-        imm: String,
-        long_imm: String,
         r3: String,
         r4: String,
         r5: String,
+        imm: String,
+        long_imm: String,
+        ir: String,
+        reg_bank: Vec<String>,
         a: String,
         b: String,
         wb: String,
@@ -1093,11 +1102,11 @@ pub mod proc {
         opcode: String,
         r1: String,
         r2: String,
-        imm: String,
-        long_imm: String,
         r3: String,
         r4: String,
         r5: String,
+        imm: String,
+        long_imm: String,
         a: String,
         b: String,
         pc: String,

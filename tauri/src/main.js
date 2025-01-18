@@ -143,45 +143,100 @@ function update_write_back(write_back) {
 }
 
 function update_rom(rom, fetch_pc) {
-  let rom_div = document.querySelector("#rom-div");
-  rom_div.innerHTML = ""; // Leeren des Containers
+  let rom_table = document.querySelector("#rom-table");
+  // destroy all children
+  while (rom_table.firstChild) {
+    rom_table.removeChild(rom_table.firstChild);
+  }
+  // create a new head
+  let tr_head = document.createElement("tr");
+  let th_key = document.createElement("th");
+  let th_value = document.createElement("th");
+  th_key.textContent = "Key";
+  th_value.textContent = "Value";
+  tr_head.appendChild(th_key);
+  tr_head.appendChild(th_value);
+  rom_table.appendChild(tr_head);
 
-  let fragment = document.createDocumentFragment();
   for (let key in rom) {
     let value = rom[key];
 
-    let span = document.createElement("span");
-    span.textContent = `${key}: ${value}`;
+    let tr = document.createElement("tr");
+    let td_key = document.createElement("td");
+    let td_value = document.createElement("td");
+    td_key.textContent = key;
+    td_value.textContent = value;
+    tr.appendChild(td_key);
+    tr.appendChild(td_value);
+    rom_table.appendChild(tr);
     if (key == fetch_pc) {
-      span.id = "highlighted-span";
+      tr.id = "highlighted";
+      // scroll the highlighted row to the center of the view
+      tr.scrollIntoView();
     }
-    span.style.display = "block"; // Für eine zeilenweise Darstellung
-    fragment.appendChild(span);
   }
-  rom_div.appendChild(fragment); // Fragment auf einmal hinzufügen
 }
 
 function update_ram(ram) {
-  let ram_div = document.querySelector("#ram-div");
-  ram_div.innerHTML = ""; // Leeren des Containers
+  let ram_table = document.querySelector("#ram-table");
+  // destroy all children
+  while (ram_table.firstChild) {
+    ram_table.removeChild(ram_table.firstChild);
+  }
+  // create a new head
+  let tr_head = document.createElement("tr");
+  let th_key = document.createElement("th");
+  let th_value = document.createElement("th");
+  th_key.textContent = "Key";
+  th_value.textContent = "Value";
+  tr_head.appendChild(th_key);
+  tr_head.appendChild(th_value);
+  ram_table.appendChild(tr_head);
 
-  let fragment = document.createDocumentFragment();
   for (let key in ram) {
     let value = ram[key];
-    let span = document.createElement("span");
-    span.textContent = `${key}: ${value}`;
-    span.style.display = "block"; // Für eine zeilenweise Darstellung
-    fragment.appendChild(span);
+
+    let tr = document.createElement("tr");
+    let td_key = document.createElement("td");
+    let td_value = document.createElement("td");
+    td_key.textContent = key;
+    td_value.textContent = value;
+    tr.appendChild(td_key);
+    tr.appendChild(td_value);
+    ram_table.appendChild(tr);
   }
-  ram_div.appendChild(fragment); // Fragment auf einmal hinzufügen
 }
 
 function update_reg_bank(reg_bank) {
-  let reg_bank_div = document.querySelector("#register-div");
-  reg_bank_div.innerHTML = "";
+  let reg_tabel = document.querySelector("#reg-table");
+  // destroy
+  while (reg_tabel.firstChild) {
+    reg_tabel.removeChild(reg_tabel.firstChild);
+  }
+  while (reg_tabel.firstChild) {
+    reg_tabel.removeChild(reg_tabel.firstChild);
+  }
+  // create a new head
+  let tr_head = document.createElement("tr");
+  let th_key = document.createElement("th");
+  let th_value = document.createElement("th");
+  th_key.textContent = "Key";
+  th_value.textContent = "Value";
+  tr_head.appendChild(th_key);
+  tr_head.appendChild(th_value);
+  reg_tabel.appendChild(tr_head);
+
   for (let key in reg_bank) {
     let value = reg_bank[key];
-    reg_bank_div.innerHTML += `${key}: ${value} <br>`;
+
+    let tr = document.createElement("tr");
+    let td_key = document.createElement("td");
+    let td_value = document.createElement("td");
+    td_key.textContent = key;
+    td_value.textContent = value;
+    tr.appendChild(td_key);
+    tr.appendChild(td_value);
+    reg_tabel.appendChild(tr);
   }
 }
 

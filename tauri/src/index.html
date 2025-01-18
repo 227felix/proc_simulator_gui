@@ -16,11 +16,11 @@
   </head>
 
   <body>
-    <p id="clock-p">
+    <div id="clock-p">
       <button id="load-button">Load Rom</button>
       <button id="clock-button">Clock</button>
       <button id="reset-button">Reset</button>
-    </p>
+    </div>
 
     <div id="representation-buttons">
       <label>
@@ -70,9 +70,15 @@
     </div>
 
     <div id="mem-wrapper">
-      <div id="register-div" class="mem"></div>
-      <div id="rom-div" class="mem"></div>
-      <div id="ram-div" class="mem"></div>
+      <div id="register-div" class="mem">
+        <table id="reg-table" , class="mem-table"></table>
+      </div>
+      <div id="rom-div" class="mem">
+        <table id="rom-table" , class="mem-table"></table>
+      </div>
+      <div id="ram-div" class="mem">
+        <table id="ram-table" , class="mem-table"></table>
+      </div>
     </div>
   </body>
 </html>
