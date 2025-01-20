@@ -7,6 +7,7 @@ let max_digits_hex = 8;
 let max_digits_bin = 32;
 let max_digits_dec = 10;
 let autoclockInterval;
+let autoclockIntervalTime = 250;
 
 async function clock() {
   let new_state = await invoke("clock_processor", {});
@@ -206,7 +207,7 @@ function startAutoclock() {
     let new_state = await clock();
     let new_state_obj = JSON.parse(new_state);
     update_state(new_state_obj);
-  }, 250);
+  }, autoclockIntervalTime);
 }
 
 function stopAutoclock() {
@@ -277,8 +278,10 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   let autoclock_button = document.querySelector("#autoclock-button");
   let stop_button = document.querySelector("#stop-button");
+  let autoclock_interval_input = document.querySelector("#autoclock-interval");
 
   autoclock_button.addEventListener("click", (e) => {
+    autoclockIntervalTime = parseInt(autoclock_interval_input.value) || 250;
     startAutoclock();
     autoclock_button.style.display = "none";
     stop_button.style.display = "inline-block";
