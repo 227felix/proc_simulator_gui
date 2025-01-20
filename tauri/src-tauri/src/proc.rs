@@ -1200,7 +1200,8 @@ pub mod proc {
             let mut rom = vec![0; rom_size as usize];
             let file = std::fs::File::open(file_path);
             if file.is_err() {
-                panic!("File not found");
+                // return empty rom if file not found
+                return rom;
             }
             let file = file.unwrap();
             let reader = std::io::BufReader::new(file);
