@@ -15,12 +15,12 @@ pub mod proc {
     }
 
     impl FetchPhase {
-        fn rising_edge(&mut self, rom: &Vec<i32>) {
+        fn rising_edge(&mut self, rom: &Vec<i32>, pc: i32) {
             self.ir = rom[self.pc as usize];
             // FIXME: fix halt logic
             let opcode = (self.ir >> 26) as i8;
             if !(opcode == HALT) {
-                self.pc = self.pc + 1;
+                self.pc = pc + 1;
             }
         }
 
@@ -358,6 +358,10 @@ pub mod proc {
         fn get_data_out(&self) -> i32 {
             self.data_out
         }
+
+        fn get_br_flag(&self) -> bool {
+            self.br_flag
+        }
     }
 
     #[derive(Clone, Serialize)]
@@ -519,8 +523,13 @@ pub mod proc {
             let execute_clone = self.execute.clone();
             let memory_clone = self.memory.clone();
 
-            let mut pc = self.memory.get_pc();
-            self.fetch.rising_edge(&self.rom);
+            let mut new_pc = fetch_clone.get_pc();
+
+            if memory_clone.get_br_flag() {
+                new_pc = memory_clone.get_pc();
+            }
+
+            self.fetch.rising_edge(&self.rom, new_pc);
 
             self.decode.rising_edge(
                 fetch_clone.get_ir(),
