@@ -1,6 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use serde::Serialize;
 use std::env;
 use tauri::{Manager, State};
 use tauri_plugin_dialog::DialogExt;
@@ -12,6 +13,7 @@ use std::{
 
 use proc::proc::*;
 mod my_def;
+use my_def::constants::*;
 
 struct ProcessorState {
     processor: Mutex<Processor>,
