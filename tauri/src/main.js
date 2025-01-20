@@ -204,6 +204,11 @@ window.addEventListener("DOMContentLoaded", async () => {
   let new_state = await invoke("get_state", {}).then((new_state) => {
     let new_state_obj = JSON.parse(new_state);
 
+    let filepath = new_state_obj.file_path;
+    let filepath_span = document.querySelector("#filepath-div");
+    filepath_span.textContent = "Rom: ";
+    filepath_span.textContent += filepath;
+
     update_state(new_state_obj);
   });
 

@@ -2,6 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use serde::Serialize;
+use std::env;
 use tauri::{Manager, State};
 use tauri_plugin_dialog::DialogExt;
 mod proc;
@@ -84,7 +85,13 @@ fn load_program(app: tauri::AppHandle, state: State<'_, Arc<ProcessorState>>) ->
 fn main() {
     tauri::Builder::default()
         .setup(|app| {
-            let proc = Processor::new_empty_rom();
+            let args: Vec<String> = env::args().collect();
+            let proc = if args.len() > 1 {
+                let rom_path = PathBuf::from(&args[1]);
+                Processor::new(rom_path, "hex".to_string())
+            } else {
+                Processor::new_empty_rom()
+            };
 
             let processor_state = ProcessorState {
                 processor: Mutex::new(proc),
