@@ -105,6 +105,20 @@ button {
   margin-right: 5px;
 }
 
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f6f6f6;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #c4c4c4;
+  border-radius: 10px;
+  border: 2px solid #f6f6f6;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     color: #f6f6f6;
@@ -122,6 +136,15 @@ button {
   }
   button:active {
     background-color: #0f0f0f69;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #2f2f2f;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: #555;
+    border: 2px solid #2f2f2f;
   }
 }
 
@@ -169,7 +192,7 @@ button {
 }
 
 .pipeline td,
-th {
+.pipeline th {
   text-align: right;
 }
 
