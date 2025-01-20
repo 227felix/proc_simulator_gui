@@ -163,6 +163,7 @@ button {
 }
 #load {
   width: 40%;
+  white-space: nowrap;
 }
 
 #representation-buttons {
