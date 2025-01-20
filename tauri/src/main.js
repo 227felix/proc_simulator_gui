@@ -6,6 +6,7 @@ let num_rep = "hex";
 let max_digits_hex = 8;
 let max_digits_bin = 32;
 let max_digits_dec = 10;
+let autoclockInterval;
 
 async function clock() {
   let new_state = await invoke("clock_processor", {});
@@ -200,6 +201,18 @@ async function set_num_representation(representation) {
   update_state(new_state_obj);
 }
 
+function startAutoclock() {
+  autoclockInterval = setInterval(async () => {
+    let new_state = await clock();
+    let new_state_obj = JSON.parse(new_state);
+    update_state(new_state_obj);
+  }, 250);
+}
+
+function stopAutoclock() {
+  clearInterval(autoclockInterval);
+}
+
 window.addEventListener("DOMContentLoaded", async () => {
   let new_state = await invoke("get_state", {}).then((new_state) => {
     let new_state_obj = JSON.parse(new_state);
@@ -260,5 +273,20 @@ window.addEventListener("DOMContentLoaded", async () => {
     filepath_span.textContent = "Rom: ";
     filepath_span.textContent += filepath;
     update_state(new_state_obj);
+  });
+
+  let autoclock_button = document.querySelector("#autoclock-button");
+  let stop_button = document.querySelector("#stop-button");
+
+  autoclock_button.addEventListener("click", (e) => {
+    startAutoclock();
+    autoclock_button.style.display = "none";
+    stop_button.style.display = "inline-block";
+  });
+
+  stop_button.addEventListener("click", (e) => {
+    stopAutoclock();
+    stop_button.style.display = "none";
+    autoclock_button.style.display = "inline-block";
   });
 });
