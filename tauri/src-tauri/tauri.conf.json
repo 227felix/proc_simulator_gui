@@ -13,19 +13,20 @@
       "icons/icon.ico"
     ]
   },
-  "productName": "tauri",
-  "mainBinaryName": "tauri",
+  "productName": "Proc Sim",
+  "mainBinaryName": "procsim",
   "version": "0.1.0",
-  "identifier": "com.example.tauri-test",
+  "identifier": "com.felix.procsim",
   "plugins": {},
   "app": {
     "withGlobalTauri": true,
     "windows": [
       {
-        "title": "tauri",
-        "width": 800,
-        "height": 600,
-        "useHttpsScheme": true
+        "title": "Proc Sim",
+        "useHttpsScheme": true,
+        "maximized": true,
+        "resizable": true,
+        "decorations": true
       }
     ],
     "security": {
