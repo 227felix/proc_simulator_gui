@@ -58,6 +58,14 @@ fn reset_processor(state: State<'_, Arc<ProcessorState>>) -> String {
 }
 
 #[tauri::command]
+fn reload_program(state: State<'_, Arc<ProcessorState>>) -> String {
+    let mut processor = state.processor.lock().unwrap();
+    let new_processor = processor.reload_program();
+    *processor = new_processor;
+    processor.get_state_serialized()
+}
+
+#[tauri::command]
 fn load_program(app: tauri::AppHandle, state: State<'_, Arc<ProcessorState>>) -> String {
     let mut processor = state.processor.lock().unwrap();
     // open file dialog to get file path
@@ -82,7 +90,7 @@ fn main() {
                 processor: Mutex::new(proc),
             };
 
-            app.manage(Arc::new(processor_state)); // Correctly manage the ProcessorState
+            app.manage(Arc::new(processor_state));
 
             Ok(())
         })
@@ -95,7 +103,8 @@ fn main() {
             get_state,
             set_num_representation,
             reset_processor,
-            load_program
+            load_program,
+            reload_program
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -320,6 +320,21 @@ window.addEventListener("DOMContentLoaded", async () => {
   load_button.addEventListener("click", async (e) => {
     let new_state = await invoke("load_program", {});
     let new_state_obj = JSON.parse(new_state);
+    let filepath = new_state_obj.file_path;
+    let filepath_span = document.querySelector("#filepath-div");
+    filepath_span.textContent = "Rom: ";
+    filepath_span.textContent += filepath;
+    update_state(new_state_obj);
+  });
+
+  let reload_button = document.querySelector("#reload-button");
+  reload_button.addEventListener("click", async (e) => {
+    let new_state = await invoke("reload_program", {});
+    let new_state_obj = JSON.parse(new_state);
+    let filepath = new_state_obj.file_path;
+    let filepath_span = document.querySelector("#filepath-div");
+    filepath_span.textContent = "Rom: ";
+    filepath_span.textContent += filepath;
     update_state(new_state_obj);
   });
 });

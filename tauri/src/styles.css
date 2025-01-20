@@ -117,17 +117,21 @@ button {
   }
 }
 
-.vid {
-  width: 50%;
-  height: auto;
-  margin-top: 2em;
-  margin-left: 25%;
+#header {
+  display: flex;
+  justify-content: space-evenly;
+  margin: 0.5%;
+  padding: 0.5%;
+  height: 10%;
 }
-
-#file-list {
-  /* allow overflow */
-  overflow: auto;
-  max-height: 50vh;
+#filepath-div {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
+#load {
+  width: 40%;
 }
 
 #representation-buttons {
@@ -135,12 +139,9 @@ button {
   justify-content: center;
   margin: 1vh;
 }
-
 #clock-p {
-  display: flex;
-  justify-content: center;
-  margin: 0;
-  padding: 1vh;
+  display: block;
+  unicode-bidi: isolate;
 }
 
 #proc-div {
@@ -148,11 +149,10 @@ button {
 }
 
 #pipeline-wrapper {
-  height: 41vh;
+  height: 41%;
   display: flex;
 }
 .pipeline {
-  height: 100%;
   width: 20%;
   box-shadow: inset 0 0 0 1px rgb(194, 194, 194);
   margin: 0;

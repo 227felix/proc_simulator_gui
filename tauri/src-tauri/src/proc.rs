@@ -1,7 +1,7 @@
 pub mod proc {
     use serde::Serialize;
 
-    use crate::my_def::constants::*;
+    use crate::{load_program, my_def::constants::*};
 
     use std::{
         io::BufRead,
@@ -17,7 +17,11 @@ pub mod proc {
     impl FetchPhase {
         fn rising_edge(&mut self, rom: &Vec<i32>) {
             self.ir = rom[self.pc as usize];
-            self.pc = self.pc + 1;
+            // FIXME: fix halt logic
+            let opcode = (self.ir >> 26) as i8;
+            if !(opcode == HALT) {
+                self.pc = self.pc + 1;
+            }
         }
 
         fn falling_edge(&self) {}
@@ -411,12 +415,17 @@ pub mod proc {
         memory: MemoryPhase,
         write_back: WriteBackPhase,
         num_representation: String,
+        file_path: PathBuf,
     }
 
     impl Processor {
+        pub fn reload_program(&mut self) -> Processor {
+            self.load_program(self.file_path.clone())
+        }
+
         pub fn load_program(&self, path: PathBuf) -> Processor {
             let rom = DataReader::read_rom_from_file(&path, 1024);
-            let mut new_proc = Processor::new_with_rom(rom);
+            let mut new_proc = Processor::new_with_rom(rom, &path);
 
             // FIXME: REMOVE THIS
             let ram = DataReader::read_rom_from_file(
@@ -431,13 +440,14 @@ pub mod proc {
         pub fn reset(&self) -> Processor {
             //
             let rom = self.rom.clone();
+            let rom_path = self.file_path.clone();
 
-            let mut new_proc = Processor::new_with_rom(rom);
+            let mut new_proc = Processor::new_with_rom(rom, &rom_path);
             new_proc.set_num_rep(self.num_representation.clone());
             new_proc
         }
 
-        fn new_with_rom(rom: Vec<i32>) -> Processor {
+        fn new_with_rom(rom: Vec<i32>, rom_path: &PathBuf) -> Processor {
             let ram = vec![0; 1024];
             let fetch = FetchPhase { pc: 0, ir: 0 };
             let decode = DecodePhase {
@@ -499,6 +509,7 @@ pub mod proc {
                 memory,
                 write_back,
                 num_representation: "hex".to_string(),
+                file_path: rom_path.to_path_buf(),
             }
         }
         pub fn clock(&mut self) {
@@ -622,6 +633,7 @@ pub mod proc {
                 memory,
                 write_back,
                 num_representation: "hex".to_string(),
+                file_path: PathBuf::new(),
             }
         }
 
@@ -688,6 +700,7 @@ pub mod proc {
                 memory,
                 write_back,
                 num_representation,
+                file_path: path,
             }
         }
 
@@ -769,6 +782,7 @@ pub mod proc {
                     write_en: format!("{:01x}", self.write_back.write_en as i8),
                 },
                 num_representation: self.num_representation.clone(),
+                file_path: self.file_path.to_string_lossy().to_string(),
             }
         }
 
@@ -836,6 +850,7 @@ pub mod proc {
                     write_en: format!("{:01}", self.write_back.write_en as i8),
                 },
                 num_representation: self.num_representation.clone(),
+                file_path: self.file_path.to_string_lossy().to_string(),
             }
         }
 
@@ -903,6 +918,7 @@ pub mod proc {
                     write_en: format!("{:01b}", self.write_back.write_en as i8),
                 },
                 num_representation: self.num_representation.clone(),
+                file_path: self.file_path.to_string_lossy().to_string(),
             }
         }
     }
@@ -917,6 +933,7 @@ pub mod proc {
         memory: MemoryPhaseHex,
         write_back: WriteBackPhaseHex,
         num_representation: String,
+        file_path: String,
     }
 
     #[derive(Serialize)]
@@ -993,6 +1010,7 @@ pub mod proc {
         memory: MemoryPhaseDec,
         write_back: WriteBackPhaseDec,
         num_representation: String,
+        file_path: String,
     }
 
     #[derive(Serialize)]
@@ -1069,6 +1087,7 @@ pub mod proc {
         memory: MemoryPhaseBin,
         write_back: WriteBackPhaseBin,
         num_representation: String,
+        file_path: String,
     }
 
     #[derive(Serialize)]

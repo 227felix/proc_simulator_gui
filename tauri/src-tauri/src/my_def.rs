@@ -17,5 +17,6 @@ pub mod constants {
     pub const MODU: i8 = 14;
     pub const MOVI: i8 = 15;
 
+    pub const HALT: i8 = 0b011110;
     pub const NOOP: i8 = 0b011111;
 }
