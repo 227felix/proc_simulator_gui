@@ -21,6 +21,14 @@
   user-select: none;
 
   overflow: hidden;
+  height: 100%;
+}
+
+body {
+  height: 100vh;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .container {
@@ -149,7 +157,7 @@ button {
 }
 
 #pipeline-wrapper {
-  height: 41%;
+  height: 48%;
   display: flex;
 }
 .pipeline {
@@ -158,6 +166,11 @@ button {
   margin: 0;
   padding: 0.5vh;
   overflow: auto;
+}
+
+.pipeline td,
+th {
+  text-align: right;
 }
 
 #mem-title-wrapper {
@@ -185,7 +198,7 @@ button {
 }
 
 #mem-wrapper {
-  height: 40vh;
+  height: 35%;
   padding: 0.5vh;
   display: flex;
 }

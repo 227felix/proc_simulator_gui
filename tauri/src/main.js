@@ -12,134 +12,56 @@ async function clock() {
   return new_state;
 }
 
-function update_fetch(fetch) {
-  let fetch_div = document.querySelector("#fetch-div");
-  fetch_div.innerHTML = "";
-  for (let key in fetch) {
-    let value = fetch[key];
-
-    switch (num_rep) {
-      case "hex":
-        value = "&nbsp;".repeat(max_digits_hex - value.length) + value;
-        break;
-      case "bin":
-        value = "&nbsp;".repeat(max_digits_bin - value.length) + value;
-        break;
-      case "dec":
-        value = "&nbsp;".repeat(max_digits_dec - value.length) + value;
-        break;
-    }
-
-    let key_length = key.length;
-
-    let spaces = "&nbsp;".repeat(MAX_KEY_LENGTH - key_length);
-
-    // Hinzufügen des formatierten Inhalts
-    fetch_div.innerHTML += `${key}:${spaces} ${value} <br>`;
+function update_table(table_id, data) {
+  let table = document.querySelector(`#${table_id}`);
+  // destroy all children
+  while (table.firstChild) {
+    table.removeChild(table.firstChild);
   }
+  // create a new head
+  let tr_head = document.createElement("tr");
+  let th_key = document.createElement("th");
+  let th_value = document.createElement("th");
+  th_key.textContent = "Key";
+  th_value.textContent = "Value";
+  tr_head.appendChild(th_key);
+  tr_head.appendChild(th_value);
+  table.appendChild(tr_head);
+
+  for (let key in data) {
+    let value = data[key];
+
+    let tr = document.createElement("tr");
+    let td_key = document.createElement("td");
+    let td_value = document.createElement("td");
+    td_key.textContent = key;
+    td_value.textContent = value;
+    tr.appendChild(td_key);
+    tr.appendChild(td_value);
+    table.appendChild(tr);
+  }
+}
+
+function update_fetch(fetch) {
+  update_table("fetch-table", fetch);
 }
 
 function update_decode(decode) {
-  let decode_div = document.querySelector("#decode-div");
-  decode_div.innerHTML = "";
-  for (let key in decode) {
-    if (key === "reg_bank") {
-      continue;
-    }
-    let value = decode[key];
-
-    switch (num_rep) {
-      case "hex":
-        value = "&nbsp;".repeat(max_digits_hex - value.length) + value;
-        break;
-      case "bin":
-        value = "&nbsp;".repeat(max_digits_bin - value.length) + value;
-        break;
-      case "dec":
-        value = "&nbsp;".repeat(max_digits_dec - value.length) + value;
-        break;
-    }
-
-    let key_length = key.length;
-
-    let spaces = "&nbsp;".repeat(MAX_KEY_LENGTH - key_length);
-    decode_div.innerHTML += `${key}:${spaces} ${value} <br>`;
-  }
+  let decode_copy = { ...decode };
+  delete decode_copy.reg_bank;
+  update_table("decode-table", decode_copy);
 }
 
 function update_execute(execute) {
-  let execute_div = document.querySelector("#execute-div");
-  execute_div.innerHTML = "";
-  for (let key in execute) {
-    let value = execute[key];
-
-    switch (num_rep) {
-      case "hex":
-        value = "&nbsp;".repeat(max_digits_hex - value.length) + value;
-        break;
-      case "bin":
-        value = "&nbsp;".repeat(max_digits_bin - value.length) + value;
-        break;
-      case "dec":
-        value = "&nbsp;".repeat(max_digits_dec - value.length) + value;
-        break;
-    }
-
-    let key_length = key.length;
-
-    let spaces = "&nbsp;".repeat(MAX_KEY_LENGTH - key_length);
-    execute_div.innerHTML += `${key}:${spaces} ${value} <br>`;
-  }
+  update_table("execute-table", execute);
 }
 
 function update_memory(memory) {
-  let memory_div = document.querySelector("#memory-div");
-  memory_div.innerHTML = "";
-  for (let key in memory) {
-    let value = memory[key];
-
-    switch (num_rep) {
-      case "hex":
-        value = "&nbsp;".repeat(max_digits_hex - value.length) + value;
-        break;
-      case "bin":
-        value = "&nbsp;".repeat(max_digits_bin - value.length) + value;
-        break;
-      case "dec":
-        value = "&nbsp;".repeat(max_digits_dec - value.length) + value;
-        break;
-    }
-
-    let key_length = key.length;
-
-    let spaces = "&nbsp;".repeat(MAX_KEY_LENGTH - key_length);
-    memory_div.innerHTML += `${key}:${spaces} ${value} <br>`;
-  }
+  update_table("memory-table", memory);
 }
 
 function update_write_back(write_back) {
-  let write_back_div = document.querySelector("#write-back-div");
-  write_back_div.innerHTML = "";
-  for (let key in write_back) {
-    let value = write_back[key];
-
-    switch (num_rep) {
-      case "hex":
-        value = "&nbsp;".repeat(max_digits_hex - value.length) + value;
-        break;
-      case "bin":
-        value = "&nbsp;".repeat(max_digits_bin - value.length) + value;
-        break;
-      case "dec":
-        value = "&nbsp;".repeat(max_digits_dec - value.length) + value;
-        break;
-    }
-
-    let key_length = key.length;
-
-    let spaces = "&nbsp;".repeat(MAX_KEY_LENGTH - key_length);
-    write_back_div.innerHTML += `${key}:${spaces} ${value} <br>`;
-  }
+  update_table("write-back-table", write_back);
 }
 
 function update_rom(rom, fetch_pc) {
@@ -208,13 +130,10 @@ function update_ram(ram) {
 }
 
 function update_reg_bank(reg_bank) {
-  let reg_tabel = document.querySelector("#reg-table");
-  // destroy
-  while (reg_tabel.firstChild) {
-    reg_tabel.removeChild(reg_tabel.firstChild);
-  }
-  while (reg_tabel.firstChild) {
-    reg_tabel.removeChild(reg_tabel.firstChild);
+  let reg_table = document.querySelector("#reg-table");
+  // destroy all children
+  while (reg_table.firstChild) {
+    reg_table.removeChild(reg_table.firstChild);
   }
   // create a new head
   let tr_head = document.createElement("tr");
@@ -224,7 +143,7 @@ function update_reg_bank(reg_bank) {
   th_value.textContent = "Value";
   tr_head.appendChild(th_key);
   tr_head.appendChild(th_value);
-  reg_tabel.appendChild(tr_head);
+  reg_table.appendChild(tr_head);
 
   for (let key in reg_bank) {
     let value = reg_bank[key];
@@ -236,7 +155,7 @@ function update_reg_bank(reg_bank) {
     td_value.textContent = value;
     tr.appendChild(td_key);
     tr.appendChild(td_value);
-    reg_tabel.appendChild(tr);
+    reg_table.appendChild(tr);
   }
 }
 

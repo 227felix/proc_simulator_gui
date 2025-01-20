@@ -65,11 +65,21 @@
     <div id="proc-div"></div>
 
     <div id="pipeline-wrapper">
-      <div id="fetch-div" class="pipeline"></div>
-      <div id="decode-div" class="pipeline"></div>
-      <div id="execute-div" class="pipeline"></div>
-      <div id="memory-div" class="pipeline"></div>
-      <div id="write-back-div" class="pipeline"></div>
+      <div id="fetch-div" class="pipeline">
+        <table id="fetch-table" class="mem-table"></table>
+      </div>
+      <div id="decode-div" class="pipeline">
+        <table id="decode-table" class="mem-table"></table>
+      </div>
+      <div id="execute-div" class="pipeline">
+        <table id="execute-table" class="mem-table"></table>
+      </div>
+      <div id="memory-div" class="pipeline">
+        <table id="memory-table" class="mem-table"></table>
+      </div>
+      <div id="write-back-div" class="pipeline">
+        <table id="write-back-table" class="mem-table"></table>
+      </div>
     </div>
 
     <div id="mem-title-wrapper">
