@@ -3,6 +3,7 @@
 
 use serde::Serialize;
 use std::env;
+use std::fs;
 use tauri::{Manager, State};
 use tauri_plugin_dialog::DialogExt;
 mod proc;
@@ -90,7 +91,14 @@ fn main() {
                 let rom_path = PathBuf::from(&args[1]);
                 Processor::new(rom_path, "hex".to_string())
             } else {
-                Processor::new_empty_rom()
+                let current_dir = env::current_dir().unwrap();
+                let dat_file = current_dir.join("rom.dat");
+                println!("Looking for rom.dat in: {:?}", dat_file);
+                if dat_file.exists() {
+                    Processor::new(dat_file, "hex".to_string())
+                } else {
+                    Processor::new_empty_rom()
+                }
             };
 
             let processor_state = ProcessorState {
