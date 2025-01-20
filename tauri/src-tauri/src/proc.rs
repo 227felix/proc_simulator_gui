@@ -1206,9 +1206,13 @@ pub mod proc {
             let reader = std::io::BufReader::new(file);
             for (i, line) in reader.lines().enumerate() {
                 let line = line.unwrap();
-                let value = i32::from_str_radix(&line, 2).unwrap();
-                rom[i] = value;
-                println!("{:032b}", value);
+                let line = line.split("//").next().unwrap().trim(); // Remove comments
+                let line = line.replace(" ", ""); // Remove spaces
+                if !line.is_empty() {
+                    let value = i32::from_str_radix(&line, 2).unwrap();
+                    rom[i] = value;
+                    println!("{:032b}", value);
+                }
             }
             rom
         }
