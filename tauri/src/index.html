@@ -16,100 +16,118 @@
   </head>
 
   <body>
-    <div id="header">
-      <div id="load">
-        <button id="load-button">Load Rom</button>
-        <button id="reload-button">Reload Rom</button>
-        <div id="filepath-div"></div>
+    <!-- Titlebar -->
+    <div data-tauri-drag-region class="titlebar">
+      <div class="titlebar-button" id="titlebar-minimize">
+        <img src="assets/minimize_icon.png" alt="minimize" />
       </div>
-      <div id="clock-p">
-        <button id="clock-button">Clock</button>
-        <button id="reset-button">Reset</button>
-        <button id="autoclock-button" class="autoclock-button">
-          Autoclock
-        </button>
-        <button
-          id="stop-button"
-          style="display: none"
-          ,
-          class="autoclock-button"
-        >
-          Stop
-        </button>
-        <input
-          type="number"
-          id="autoclock-interval"
-          placeholder="Interval (ms)"
-        />
+      <div class="titlebar-button" id="titlebar-maximize">
+        <img src="assets/maximize_icon.png" alt="maximize" />
+      </div>
+      <div class="titlebar-button" id="titlebar-close">
+        <img src="assets/close_icon.png" alt="close" />
       </div>
     </div>
+    <!-- End Titlebar -->
 
-    <div id="representation-buttons">
-      <label>
-        <input
-          type="radio"
-          name="num-representation"
-          value="hex"
-          id="hex-button"
-          checked
-        />
-        Hex
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="num-representation"
-          value="dec"
-          id="dec-button"
-        />
-        Dec
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="num-representation"
-          value="bin"
-          id="bin-button"
-        />
-        Bin
-      </label>
-    </div>
+    <div id="not-titlebar">
+      <div id="header">
+        <div id="load">
+          <button id="load-button">Load Rom</button>
+          <button id="reload-button">Reload Rom</button>
+          <div id="filepath-div"></div>
+        </div>
+        <div id="clock-p">
+          <button id="clock-button">Clock</button>
+          <button id="reset-button">Reset</button>
+          <button id="autoclock-button" class="autoclock-button">
+            Autoclock
+          </button>
+          <button
+            id="stop-button"
+            style="display: none"
+            ,
+            class="autoclock-button"
+          >
+            Stop
+          </button>
+          <input
+            type="number"
+            id="autoclock-interval"
+            placeholder="Interval (ms)"
+          />
+        </div>
+      </div>
 
-    <div id="proc-div"></div>
+      <div id="content-div">
+        <div id="representation-buttons">
+          <label>
+            <input
+              type="radio"
+              name="num-representation"
+              value="hex"
+              id="hex-button"
+              checked
+            />
+            Hex
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="num-representation"
+              value="dec"
+              id="dec-button"
+            />
+            Dec
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="num-representation"
+              value="bin"
+              id="bin-button"
+            />
+            Bin
+          </label>
+        </div>
 
-    <div id="pipeline-wrapper">
-      <div id="fetch-div" class="pipeline">
-        <table id="fetch-table" class="mem-table"></table>
-      </div>
-      <div id="decode-div" class="pipeline">
-        <table id="decode-table" class="mem-table"></table>
-      </div>
-      <div id="execute-div" class="pipeline">
-        <table id="execute-table" class="mem-table"></table>
-      </div>
-      <div id="memory-div" class="pipeline">
-        <table id="memory-table" class="mem-table"></table>
-      </div>
-      <div id="write-back-div" class="pipeline">
-        <table id="write-back-table" class="mem-table"></table>
-      </div>
-    </div>
+        <div id="proc-div"></div>
 
-    <div id="mem-title-wrapper">
-      <h2 id="reg-file-title">reg_file</h2>
-      <h2 id="rom-title">rom</h2>
-      <h2 id="ram-title">ram</h2>
-    </div>
+        <div id="pipeline-wrapper">
+          <div id="fetch-div" class="pipeline">
+            <table id="fetch-table" class="mem-table"></table>
+          </div>
+          <div id="decode-div" class="pipeline">
+            <table id="decode-table" class="mem-table"></table>
+          </div>
+          <div id="execute-div" class="pipeline">
+            <table id="execute-table" class="mem-table"></table>
+          </div>
+          <div id="memory-div" class="pipeline">
+            <table id="memory-table" class="mem-table"></table>
+          </div>
+          <div id="write-back-div" class="pipeline">
+            <table id="write-back-table" class="mem-table"></table>
+          </div>
+        </div>
 
-    <div id="mem-wrapper">
-      <div id="register-div" class="mem">
-        <table id="reg-table" , class="mem-table"></table>
-      </div>
-      <div id="rom-div" class="mem">
-        <table id="rom-table" , class="mem-table"></table>
-      </div>
-      <div id="ram-div" class="mem">
-        <table id="ram-table" , class="mem-table"></table>
+        <div id="mem-title-wrapper">
+          <h2 id="reg-file-title">reg_file</h2>
+          <h2 id="rom-title">rom</h2>
+          <h2 id="ram-title">ram</h2>
+        </div>
+
+        <div id="mem-wrapper">
+          <div id="register-div" class="mem">
+            <table id="reg-table" , class="mem-table"></table>
+          </div>
+          <div id="rom-div" class="mem">
+            <table id="rom-table" , class="mem-table"></table>
+          </div>
+          <div id="ram-div" class="mem">
+            <table id="ram-table" , class="mem-table"></table>
+          </div>
+        </div>
       </div>
     </div>
   </body>

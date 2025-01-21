@@ -9,6 +9,22 @@ let max_digits_dec = 10;
 let autoclockInterval;
 let autoclockIntervalTime = 250;
 
+const { getCurrentWindow } = window.__TAURI__.window;
+
+const appWindow = getCurrentWindow();
+
+document
+  .getElementById("titlebar-minimize")
+  ?.addEventListener("click", () => appWindow.minimize());
+document
+  .getElementById("titlebar-maximize")
+  ?.addEventListener("click", () => appWindow.toggleMaximize());
+document
+  .getElementById("titlebar-close")
+  ?.addEventListener("click", () => appWindow.close());
+
+// end titlebar
+
 async function clock() {
   let new_state = await invoke("clock_processor", {});
   return new_state;
@@ -292,4 +308,5 @@ window.addEventListener("DOMContentLoaded", async () => {
     stop_button.style.display = "none";
     autoclock_button.style.display = "inline-block";
   });
+  document.addEventListener("contextmenu", (event) => event.preventDefault());
 });
