@@ -97,6 +97,7 @@ fn main() {
                 if dat_file.exists() {
                     Processor::new(dat_file, "hex".to_string())
                 } else {
+                    println!("rom.dat not found, starting with empty rom");
                     Processor::new_empty_rom()
                 }
             };
