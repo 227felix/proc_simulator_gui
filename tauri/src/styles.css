@@ -4,7 +4,7 @@
   /* font-family: "Segoe UI", sans-serif; */
   font-family: "JetBrains Mono", monospace;
   /* font-family: Verdana, Geneva, Tahoma, sans-serif; */
-  font-size: 0.8vw; /* 15px */
+  font-size: 0.75vw; /* 15px */
   line-height: 1, 28vw;
   font-weight: 500;
 
@@ -113,14 +113,14 @@ button:active {
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #c4c4c4;
+  background-color: #e0e0e0;
   border-radius: 10px;
   border: 2px solid #f6f6f6;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    color: #f6f6f6;
+    color: #dadada;
     background-color: #202020;
   }
 
@@ -191,9 +191,19 @@ button:active {
   height: 51%;
   display: flex;
 }
+.pipeline-title {
+  text-align: center;
+}
+h3 {
+  color: #ffffff;
+  margin-top: 0.7vh;
+}
+h2 {
+  color: #ffffff;
+}
 .pipeline {
   width: 20%;
-  box-shadow: inset 0 0 0 1px rgb(194, 194, 194);
+  box-shadow: inset 0 0 0 1px rgb(26, 25, 25);
   margin: 0;
   padding: 0.5vh;
   overflow: auto;
