@@ -717,6 +717,10 @@ pub mod proc {
             self.num_representation = representation;
         }
 
+        pub fn get_rom_path(&self) -> &PathBuf {
+            &self.file_path
+        }
+
         pub fn get_state_serialized(&self) -> String {
             let serialized = match self.num_representation.as_str() {
                 "hex" => serde_json::to_string(&self.to_hex()).unwrap(),

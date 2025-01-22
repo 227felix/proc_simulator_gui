@@ -4,8 +4,10 @@
 use serde::Serialize;
 use std::env;
 use std::fs;
+use std::path::Path;
 use tauri::{Manager, State};
 use tauri_plugin_dialog::DialogExt;
+use tauri_plugin_dialog::FilePath;
 mod proc;
 use std::{
     path::PathBuf,
@@ -70,12 +72,13 @@ fn reload_program(state: State<'_, Arc<ProcessorState>>) -> String {
 #[tauri::command]
 fn load_program(app: tauri::AppHandle, state: State<'_, Arc<ProcessorState>>) -> String {
     let mut processor = state.processor.lock().unwrap();
+    let current_path = processor.get_rom_path();
     // open file dialog to get file path
     let rom_file = app
         .dialog()
         .file()
         .blocking_pick_file()
-        .expect("Failed to open file")
+        .unwrap_or(FilePath::from(current_path))
         .into_path()
         .unwrap();
     let new_proc = processor.load_program(rom_file);
