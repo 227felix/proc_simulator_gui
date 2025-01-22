@@ -30,7 +30,7 @@ async function clock() {
   return new_state;
 }
 
-function update_table(table_id, data) {
+function render_table(table_id, data) {
   let table = document.querySelector(`#${table_id}`);
   // destroy all children
   while (table.firstChild) {
@@ -50,6 +50,7 @@ function update_table(table_id, data) {
     let value = data[key];
 
     let tr = document.createElement("tr");
+    tr.setAttribute("data-key", key);
     let td_key = document.createElement("td");
     let td_value = document.createElement("td");
     td_key.textContent = key;
@@ -58,6 +59,62 @@ function update_table(table_id, data) {
     tr.appendChild(td_value);
     table.appendChild(tr);
   }
+}
+
+function update_table(table_id, data) {
+  let table = document.querySelector(`#${table_id}`);
+  for (let key in data) {
+    let value = data[key];
+    let row = table.querySelector(`tr[data-key="${key}"]`);
+    if (row) {
+      let td_value = row.querySelector("td:last-child");
+      td_value.textContent = value;
+    } else {
+      let tr = document.createElement("tr");
+      tr.setAttribute("data-key", key);
+      let td_key = document.createElement("td");
+      let td_value = document.createElement("td");
+      td_key.textContent = key;
+      td_value.textContent = value;
+      tr.appendChild(td_key);
+      tr.appendChild(td_value);
+      table.appendChild(tr);
+    }
+  }
+}
+
+function render_fetch(fetch) {
+  render_table("fetch-table", fetch);
+}
+
+function render_decode(decode) {
+  let decode_copy = { ...decode };
+  delete decode_copy.reg_bank;
+  render_table("decode-table", decode_copy);
+}
+
+function render_execute(execute) {
+  render_table("execute-table", execute);
+}
+
+function render_memory(memory) {
+  render_table("memory-table", memory);
+}
+
+function render_write_back(write_back) {
+  render_table("write-back-table", write_back);
+}
+
+function render_rom(rom) {
+  render_table("rom-table", rom);
+}
+
+function render_ram(ram) {
+  render_table("ram-table", ram);
+}
+
+function render_reg_bank(reg_bank) {
+  render_table("reg-table", reg_bank);
 }
 
 function update_fetch(fetch) {
@@ -83,98 +140,67 @@ function update_write_back(write_back) {
 }
 
 function update_rom(rom, fetch_pc) {
-  let rom_table = document.querySelector("#rom-table");
-  // destroy all children
-  while (rom_table.firstChild) {
-    rom_table.removeChild(rom_table.firstChild);
-  }
-  // create a new head
-  let tr_head = document.createElement("tr");
-  let th_key = document.createElement("th");
-  let th_value = document.createElement("th");
-  th_key.textContent = "Key";
-  th_value.textContent = "Value";
-  tr_head.appendChild(th_key);
-  tr_head.appendChild(th_value);
-  rom_table.appendChild(tr_head);
-
+  let table = document.querySelector("#rom-table");
   for (let key in rom) {
     let value = rom[key];
-
-    let tr = document.createElement("tr");
-    let td_key = document.createElement("td");
-    let td_value = document.createElement("td");
-    td_key.textContent = key;
-    td_value.textContent = value;
-    tr.appendChild(td_key);
-    tr.appendChild(td_value);
-    rom_table.appendChild(tr);
-    if (key == fetch_pc) {
-      tr.id = "highlighted";
-      // scroll the highlighted row to the center of the view
-      tr.scrollIntoView();
+    let row = table.querySelector(`tr[data-key="${key}"]`);
+    if (row) {
+      let td_value = row.querySelector("td:last-child");
+      td_value.textContent = value;
+      if (key == fetch_pc) {
+        row.id = "highlighted";
+        row.scrollIntoView({
+          behavior: "auto",
+          block: "center",
+          inline: "center",
+        });
+      } else {
+        row.id = "";
+      }
+    } else {
+      let tr = document.createElement("tr");
+      tr.setAttribute("data-key", key);
+      let td_key = document.createElement("td");
+      let td_value = document.createElement("td");
+      td_key.textContent = key;
+      td_value.textContent = value;
+      tr.appendChild(td_key);
+      tr.appendChild(td_value);
+      table.appendChild(tr);
+      if (key == fetch_pc) {
+        tr.id = "highlighted";
+        tr.scrollIntoView();
+      }
     }
   }
 }
 
 function update_ram(ram) {
-  let ram_table = document.querySelector("#ram-table");
-  // destroy all children
-  while (ram_table.firstChild) {
-    ram_table.removeChild(ram_table.firstChild);
-  }
-  // create a new head
-  let tr_head = document.createElement("tr");
-  let th_key = document.createElement("th");
-  let th_value = document.createElement("th");
-  th_key.textContent = "Key";
-  th_value.textContent = "Value";
-  tr_head.appendChild(th_key);
-  tr_head.appendChild(th_value);
-  ram_table.appendChild(tr_head);
-
-  for (let key in ram) {
-    let value = ram[key];
-
-    let tr = document.createElement("tr");
-    let td_key = document.createElement("td");
-    let td_value = document.createElement("td");
-    td_key.textContent = key;
-    td_value.textContent = value;
-    tr.appendChild(td_key);
-    tr.appendChild(td_value);
-    ram_table.appendChild(tr);
-  }
+  update_table("ram-table", ram);
 }
 
 function update_reg_bank(reg_bank) {
-  let reg_table = document.querySelector("#reg-table");
-  // destroy all children
-  while (reg_table.firstChild) {
-    reg_table.removeChild(reg_table.firstChild);
-  }
-  // create a new head
-  let tr_head = document.createElement("tr");
-  let th_key = document.createElement("th");
-  let th_value = document.createElement("th");
-  th_key.textContent = "Key";
-  th_value.textContent = "Value";
-  tr_head.appendChild(th_key);
-  tr_head.appendChild(th_value);
-  reg_table.appendChild(tr_head);
+  update_table("reg-table", reg_bank);
+}
 
-  for (let key in reg_bank) {
-    let value = reg_bank[key];
+function render_state(state) {
+  let fetch = state.fetch;
+  let decode = state.decode;
+  let reg_bank = state.decode.reg_bank;
+  let execute = state.execute;
+  let memory = state.memory;
+  let write_back = state.write_back;
+  let rom = state.rom;
+  let ram = state.ram;
 
-    let tr = document.createElement("tr");
-    let td_key = document.createElement("td");
-    let td_value = document.createElement("td");
-    td_key.textContent = key;
-    td_value.textContent = value;
-    tr.appendChild(td_key);
-    tr.appendChild(td_value);
-    reg_table.appendChild(tr);
-  }
+  render_fetch(fetch);
+  render_decode(decode);
+  render_execute(execute);
+  render_memory(memory);
+  render_write_back(write_back);
+  render_rom(rom);
+  render_ram(ram);
+  render_reg_bank(reg_bank);
 }
 
 function update_state(state) {
@@ -239,7 +265,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     filepath_span.textContent = "Rom: ";
     filepath_span.textContent += filepath;
 
-    update_state(new_state_obj);
+    render_state(new_state_obj);
   });
 
   let clock_button = document.querySelector("#clock-button");
@@ -278,7 +304,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     let filepath_span = document.querySelector("#filepath-div");
     filepath_span.textContent = "Rom: ";
     filepath_span.textContent += filepath;
-    update_state(new_state_obj);
+    render_state(new_state_obj);
   });
 
   let reload_button = document.querySelector("#reload-button");
@@ -289,7 +315,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     let filepath_span = document.querySelector("#filepath-div");
     filepath_span.textContent = "Rom: ";
     filepath_span.textContent += filepath;
-    update_state(new_state_obj);
+    render_state(new_state_obj);
   });
 
   let autoclock_button = document.querySelector("#autoclock-button");
