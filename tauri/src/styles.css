@@ -152,7 +152,7 @@ button:active {
   display: flex;
   justify-content: space-evenly;
   padding: 1%;
-  height: 10%;
+  /* height: 6vw; */
 }
 #content-div {
   height: 90%;
@@ -203,10 +203,13 @@ h2 {
 }
 .pipeline {
   width: 20%;
-  box-shadow: inset 0 0 0 1px rgb(26, 25, 25);
+  box-shadow: inset 0 0 0 0.17vw rgb(26, 25, 25);
   margin: 0;
   padding: 0.5vh;
   overflow: auto;
+  border-radius: 8px; /* Added to make the box-shadow have rounded corners */
+  margin-left: 0.1vw;
+  margin-right: 0.1vw;
 }
 
 .pipeline td,
