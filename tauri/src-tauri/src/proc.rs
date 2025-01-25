@@ -1223,6 +1223,7 @@ pub mod proc {
                 let line = line.split("//").next().unwrap().trim(); // Remove comments
                 let line = line.replace(" ", ""); // Remove spaces
                 if !line.is_empty() {
+                    println!("{}", line);
                     let value = i32::from_str_radix(&line, 2).unwrap();
                     rom[i] = value;
                     println!("{:032b}", value);

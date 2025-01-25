@@ -312,3 +312,7 @@ h2 {
   width: 22px;
   margin: 5px;
 }
+
+#titlebar-close:hover {
+  background: #d41c12;
+}
