@@ -15,12 +15,15 @@ pub mod proc {
     }
 
     impl FetchPhase {
-        fn rising_edge(&mut self, rom: &Vec<i32>, pc: i32) {
+        fn rising_edge(&mut self, rom: &Vec<i32>, pc: i32, pc_alt: i32, branch_flag: bool) {
             self.ir = rom[self.pc as usize];
             // FIXME: fix halt logic
             let opcode = (self.ir >> 26) as i8;
             if !(opcode == HALT) {
                 self.pc = pc + 1;
+            }
+            if branch_flag {
+                self.pc = pc_alt;
             }
         }
 
@@ -182,14 +185,14 @@ pub mod proc {
             pc: i32,
         ) {
             self.opcode = opcode;
-            self.r1 = r1;
+            self.r1 = r2; //FIXME
             self.r2 = r2;
             self.imm = imm;
             self.long_imm = long_imm;
             self.r3 = r3;
             self.r4 = r4;
             self.r5 = r5;
-            self.a = a;
+            self.b = b;
             self.pc = pc;
 
             // do the alu_op
@@ -197,13 +200,13 @@ pub mod proc {
             self.br_flag = br_flag;
             if opcode < 6 {
                 //TODO fix this
-                self.b = alu_out;
+                self.a = alu_out;
                 // r3 ist die ziel register adresse für alu op
-                self.r1 = r3;
+                self.r1 = r3; // r3 ist das ziel register
             } else {
-                self.b = b;
+                self.a = a;
             }
-            if opcode == MOVI {
+            if opcode == LDI {
                 self.b = imm as i32;
             }
         }
@@ -233,6 +236,10 @@ pub mod proc {
 
         fn get_r1(&self) -> i8 {
             self.r1
+        }
+
+        fn get_r2(&self) -> i8 {
+            self.r2
         }
 
         fn get_imm(&self) -> i16 {
@@ -313,16 +320,18 @@ pub mod proc {
 
             if self.opcode == LDW {
                 self.data_out = ram[self.addr as usize];
+            } else if self.opcode == LDI {
+                self.data_out = self.imm as i32;
             } else {
                 self.data_out = data;
             }
 
-            if self.opcode == JMP {
-                self.pc = self.long_imm;
-            }
-
             if self.br_flag {
                 self.pc += self.imm as i32;
+            }
+            if self.opcode == JMP {
+                self.pc = self.long_imm;
+                self.br_flag = true;
             }
         }
 
@@ -355,6 +364,10 @@ pub mod proc {
             self.r1
         }
 
+        fn get_r2(&self) -> i8 {
+            self.r1
+        }
+
         fn get_data_out(&self) -> i32 {
             self.data_out
         }
@@ -378,7 +391,7 @@ pub mod proc {
             self.r1 = r1;
             self.data = data;
             println!("opcode: {}", opcode);
-            if opcode == LDW || opcode == MOVI || opcode < 6 {
+            if opcode == LDW || opcode == LDI || opcode < 6 {
                 self.write_en = true;
             } else {
                 self.write_en = false;
@@ -523,13 +536,12 @@ pub mod proc {
             let execute_clone = self.execute.clone();
             let memory_clone = self.memory.clone();
 
-            let mut new_pc = fetch_clone.get_pc();
+            let new_pc = fetch_clone.get_pc();
+            let new_pc_alt = memory_clone.get_pc();
+            let branch_flag = memory_clone.get_br_flag();
 
-            if memory_clone.get_br_flag() {
-                new_pc = memory_clone.get_pc();
-            }
-
-            self.fetch.rising_edge(&self.rom, new_pc);
+            self.fetch
+                .rising_edge(&self.rom, new_pc, new_pc_alt, branch_flag);
 
             self.decode.rising_edge(
                 fetch_clone.get_ir(),
@@ -558,8 +570,8 @@ pub mod proc {
                 execute_clone.get_r1(),
                 execute_clone.get_imm(),
                 execute_clone.get_long_imm(),
-                execute_clone.get_b(),
                 execute_clone.get_a(),
+                execute_clone.get_b(),
                 execute_clone.get_pc(),
                 execute_clone.get_br_flag(),
                 &mut self.ram,
