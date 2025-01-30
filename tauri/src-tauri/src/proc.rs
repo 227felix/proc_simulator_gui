@@ -391,7 +391,7 @@ pub mod proc {
             self.r1 = r1;
             self.data = data;
             println!("opcode: {}", opcode);
-            if opcode == LDW || opcode == LDI || opcode < 6 {
+            if opcode == LDW || opcode == LDI || (opcode < BEQ && opcode > NOP) {
                 self.write_en = true;
             } else {
                 self.write_en = false;
