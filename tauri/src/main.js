@@ -105,8 +105,33 @@ function render_write_back(write_back) {
   render_table("write-back-table", write_back);
 }
 
-function render_rom(rom) {
+function render_rom(rom, fetch_pc) {
   render_table("rom-table", rom);
+  let base;
+  switch (num_rep) {
+    case "hex":
+      base = 16;
+      break;
+    case "bin":
+      base = 2;
+      break;
+    case "dec":
+      base = 10;
+      break;
+  }
+  let parsed_fetch_pc = parseInt(fetch_pc, base);
+  let table = document.querySelector("#rom-table");
+  let row = table.querySelector(`tr[data-key="${parsed_fetch_pc}"]`);
+  console.log(fetch_pc);
+  console.log(row);
+  if (row) {
+    row.id = "highlighted";
+    row.scrollIntoView({
+      behavior: "auto",
+      block: "center",
+      inline: "center",
+    });
+  }
 }
 
 function render_ram(ram) {
@@ -162,10 +187,6 @@ function update_rom(rom, fetch_pc) {
 function update_ram(changed_ramfield) {
   // update the ram field that has changed
   // check if the changed field holds -1 as twos complement and skip if so FIXME:
-  if (changed_ramfield[0] == "ffffffff") {
-    return;
-  }
-  console.log(changed_ramfield[0]);
   // parse the key with the number representation
   let base;
   switch (num_rep) {
@@ -181,6 +202,9 @@ function update_ram(changed_ramfield) {
   }
 
   let key = parseInt(changed_ramfield[0], base);
+  if (key == -1) {
+    return;
+  }
 
   let value = changed_ramfield[1];
   let ram_field = document.querySelector(`#ram-table tr[data-key="${key}"]`);
@@ -199,6 +223,7 @@ function update_reg_bank(reg_bank) {
 
 function render_state(state, first_render = false) {
   let fetch = state.fetch;
+  let fetch_pc = state.fetch.pc;
   let decode = state.decode;
   let reg_bank = state.decode.reg_bank;
   let execute = state.execute;
@@ -212,7 +237,7 @@ function render_state(state, first_render = false) {
   render_execute(execute);
   render_memory(memory);
   render_write_back(write_back);
-  render_rom(rom);
+  render_rom(rom, fetch_pc);
   render_ram(ram);
   render_reg_bank(reg_bank);
 }
