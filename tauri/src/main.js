@@ -141,49 +141,63 @@ function update_write_back(write_back) {
 
 function update_rom(rom, fetch_pc) {
   let table = document.querySelector("#rom-table");
-  for (let key in rom) {
-    let value = rom[key];
-    let row = table.querySelector(`tr[data-key="${key}"]`);
-    if (row) {
-      let td_value = row.querySelector("td:last-child");
-      td_value.textContent = value;
-      if (key == fetch_pc) {
-        row.id = "highlighted";
-        row.scrollIntoView({
-          behavior: "auto",
-          block: "center",
-          inline: "center",
-        });
-      } else {
-        row.id = "";
-      }
-    } else {
-      let tr = document.createElement("tr");
-      tr.setAttribute("data-key", key);
-      let td_key = document.createElement("td");
-      let td_value = document.createElement("td");
-      td_key.textContent = key;
-      td_value.textContent = value;
-      tr.appendChild(td_key);
-      tr.appendChild(td_value);
-      table.appendChild(tr);
-      if (key == fetch_pc) {
-        tr.id = "highlighted";
-        tr.scrollIntoView();
-      }
-    }
+  // grab all tr with id=highlighted and remove the id
+  let highlighted = table.querySelector("#highlighted");
+  if (highlighted) {
+    highlighted.removeAttribute("id");
+  }
+
+  let row = table.querySelector(`tr[data-key="${fetch_pc}"]`);
+  if (row) {
+    let td_value = row.querySelector("td:last-child");
+    row.id = "highlighted";
+    row.scrollIntoView({
+      behavior: "auto",
+      block: "center",
+      inline: "center",
+    });
   }
 }
 
-function update_ram(ram) {
-  update_table("ram-table", ram);
+function update_ram(changed_ramfield) {
+  // update the ram field that has changed
+  // check if the changed field holds -1 as twos complement and skip if so FIXME:
+  if (changed_ramfield[0] == "ffffffff") {
+    return;
+  }
+  console.log(changed_ramfield[0]);
+  // parse the key with the number representation
+  let base;
+  switch (num_rep) {
+    case "hex":
+      base = 16;
+      break;
+    case "bin":
+      base = 2;
+      break;
+    case "dec":
+      base = 10;
+      break;
+  }
+
+  let key = parseInt(changed_ramfield[0], base);
+
+  let value = changed_ramfield[1];
+  let ram_field = document.querySelector(`#ram-table tr[data-key="${key}"]`);
+
+  if (ram_field) {
+    let td_value = ram_field.querySelector("td:last-child");
+    td_value.textContent = value;
+  }
+
+  console.log(ram_field);
 }
 
 function update_reg_bank(reg_bank) {
   update_table("reg-table", reg_bank);
 }
 
-function render_state(state) {
+function render_state(state, first_render = false) {
   let fetch = state.fetch;
   let decode = state.decode;
   let reg_bank = state.decode.reg_bank;
@@ -211,7 +225,7 @@ function update_state(state) {
   let memory = state.memory;
   let write_back = state.write_back;
   let rom = state.rom;
-  let ram = state.ram;
+  let changed_ramfield = state.changed_ramfield;
 
   let base = 2;
   switch (num_rep) {
@@ -233,7 +247,7 @@ function update_state(state) {
   update_memory(memory);
   update_write_back(write_back);
   update_rom(rom, fetch_pc);
-  update_ram(ram);
+  update_ram(changed_ramfield);
   update_reg_bank(reg_bank);
 }
 
@@ -241,7 +255,7 @@ async function set_num_representation(representation) {
   await invoke("set_num_representation", { representation });
   let new_state = await invoke("get_state", {});
   let new_state_obj = JSON.parse(new_state);
-  update_state(new_state_obj);
+  render_state(new_state_obj);
 }
 
 function startAutoclock() {
@@ -265,7 +279,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     filepath_span.textContent = "Rom: ";
     filepath_span.textContent += filepath;
 
-    render_state(new_state_obj);
+    render_state(new_state_obj, true);
   });
 
   let clock_button = document.querySelector("#clock-button");
@@ -293,7 +307,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   reset_button.addEventListener("click", async (e) => {
     let new_state = await invoke("reset_processor", {});
     let new_state_obj = JSON.parse(new_state);
-    update_state(new_state_obj);
+    render_state(new_state_obj);
   });
 
   let load_button = document.querySelector("#load-button");

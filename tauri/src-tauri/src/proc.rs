@@ -293,6 +293,7 @@ pub mod proc {
             pc: i32,
             br_flag: bool,
             ram: &mut Vec<i32>,
+            changed_ramfield: &mut (i32, i32),
         ) {
             self.opcode = opcode;
             self.r1 = r1;
@@ -314,8 +315,10 @@ pub mod proc {
                     self.addr = 0;
                 }
                 self.data_out = ram[self.addr as usize]; // FIXME: eventuell sollte man den RAM als eigene Struktur haben um die Verzögerung korrekt darzustellen
+                *changed_ramfield = (-1, -1);
             } else {
                 ram[self.addr as usize] = self.data;
+                *changed_ramfield = (self.addr, self.data);
             }
 
             if self.opcode == LDW {
@@ -426,6 +429,7 @@ pub mod proc {
     pub struct Processor {
         rom: Vec<i32>,
         ram: Vec<i32>,
+        changed_ramfield: (i32, i32),
         fetch: FetchPhase,
         decode: DecodePhase,
         execute: ExecutePhase,
@@ -525,6 +529,7 @@ pub mod proc {
                 execute,
                 memory,
                 write_back,
+                changed_ramfield: (0, 0),
                 num_representation: "hex".to_string(),
                 file_path: rom_path.to_path_buf(),
             }
@@ -575,6 +580,7 @@ pub mod proc {
                 execute_clone.get_pc(),
                 execute_clone.get_br_flag(),
                 &mut self.ram,
+                &mut self.changed_ramfield,
             );
 
             self.write_back.rising_edge(
@@ -653,6 +659,7 @@ pub mod proc {
                 execute,
                 memory,
                 write_back,
+                changed_ramfield: (0, 0),
                 num_representation: "hex".to_string(),
                 file_path: PathBuf::new(),
             }
@@ -720,6 +727,7 @@ pub mod proc {
                 execute,
                 memory,
                 write_back,
+                changed_ramfield: (0, 0),
                 num_representation,
                 file_path: path,
             }
@@ -808,6 +816,10 @@ pub mod proc {
                 },
                 num_representation: self.num_representation.clone(),
                 file_path: self.file_path.to_string_lossy().to_string(),
+                changed_ramfield: (
+                    format!("{:08x}", self.changed_ramfield.0),
+                    format!("{:08x}", self.changed_ramfield.1),
+                ),
             }
         }
 
@@ -876,6 +888,10 @@ pub mod proc {
                 },
                 num_representation: self.num_representation.clone(),
                 file_path: self.file_path.to_string_lossy().to_string(),
+                changed_ramfield: (
+                    format!("{:010}", self.changed_ramfield.0),
+                    format!("{:010}", self.changed_ramfield.1),
+                ),
             }
         }
 
@@ -944,6 +960,10 @@ pub mod proc {
                 },
                 num_representation: self.num_representation.clone(),
                 file_path: self.file_path.to_string_lossy().to_string(),
+                changed_ramfield: (
+                    format!("{:032b}", self.changed_ramfield.0),
+                    format!("{:032b}", self.changed_ramfield.1),
+                ),
             }
         }
     }
@@ -959,6 +979,7 @@ pub mod proc {
         write_back: WriteBackPhaseHex,
         num_representation: String,
         file_path: String,
+        changed_ramfield: (String, String),
     }
 
     #[derive(Serialize)]
@@ -1036,6 +1057,7 @@ pub mod proc {
         write_back: WriteBackPhaseDec,
         num_representation: String,
         file_path: String,
+        changed_ramfield: (String, String),
     }
 
     #[derive(Serialize)]
@@ -1113,6 +1135,7 @@ pub mod proc {
         write_back: WriteBackPhaseBin,
         num_representation: String,
         file_path: String,
+        changed_ramfield: (String, String),
     }
 
     #[derive(Serialize)]
