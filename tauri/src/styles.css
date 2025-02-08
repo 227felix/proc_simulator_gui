@@ -9,7 +9,7 @@
   font-weight: 500;
 
   color: #0f0f0f;
-  background-color: #f6f6f6;
+  background-color: #e2e2e2;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -145,10 +145,34 @@ button:active {
     background-color: #555;
     border: 2px solid #2f2f2f;
   }
+  #header {
+    background-color: #1d1d1d;
+  }
+  .titlebar {
+    background: #181818;
+  }
+  .titlebar-button:hover {
+    background: #292929;
+  }
+
+  .pipeline {
+    box-shadow: inset 0 0 0 0.17vw rgb(26, 25, 25);
+  }
+}
+@media (prefers-color-scheme: light) {
+  #header {
+    background-color: #dbdbdb;
+  }
+  .titlebar {
+    background-color: #d6d6d6;
+  }
+
+  .pipeline {
+    box-shadow: inset 0 0 0 0.17vw rgb(207, 207, 207);
+  }
 }
 
 #header {
-  background-color: #1d1d1d;
   display: flex;
   justify-content: space-evenly;
   padding: 1%;
@@ -195,15 +219,11 @@ button:active {
   text-align: center;
 }
 h3 {
-  color: #ffffff;
   margin-top: 0.7vh;
 }
-h2 {
-  color: #ffffff;
-}
+
 .pipeline {
   width: 20%;
-  box-shadow: inset 0 0 0 0.17vw rgb(26, 25, 25);
   margin: 0;
   padding: 0.5vh;
   overflow: auto;
@@ -285,7 +305,6 @@ h2 {
     */
 .titlebar {
   height: 30px;
-  background: #181818;
   user-select: none;
   display: flex;
   justify-content: flex-end;
@@ -304,7 +323,7 @@ h2 {
   -webkit-user-select: none;
 }
 .titlebar-button:hover {
-  background: #292929;
+  background: #b4b4b4;
 }
 
 .titlebar img {

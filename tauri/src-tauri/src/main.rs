@@ -14,6 +14,8 @@ use std::{
     sync::{Arc, Mutex},
 };
 
+use color_backtrace::install;
+
 use proc::proc::*;
 mod my_def;
 use my_def::constants::*;
@@ -87,6 +89,7 @@ fn load_program(app: tauri::AppHandle, state: State<'_, Arc<ProcessorState>>) ->
 }
 
 fn main() {
+    install();
     tauri::Builder::default()
         .setup(|app| {
             let args: Vec<String> = env::args().collect();

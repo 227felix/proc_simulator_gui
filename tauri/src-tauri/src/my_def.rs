@@ -14,9 +14,7 @@ pub mod constants {
     pub const LDW: i8 = 11;
     pub const STW: i8 = 12;
     pub const LDI: i8 = 13;
-    pub const MUL: i8 = 14;
-    pub const DIV: i8 = 15;
-    pub const MODU: i8 = 16;
+    pub const MOV: i8 = 14;
 
     pub const HALT: i8 = 0b011110;
 }

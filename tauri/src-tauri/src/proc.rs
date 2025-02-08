@@ -83,31 +83,6 @@ pub mod proc {
 
         fn falling_edge(&self) {}
 
-        fn pretty_print(&self) {
-            println!("==================== Decode Phase ====================");
-            println!("IR:          {:032b}", self.ir);
-            println!("Opcode:      {:08b}", self.opcode);
-            println!("R1:          {:05b}", self.r1);
-            println!("R2:          {:05b}", self.r2);
-            println!("Imm:         {:016b}", self.imm);
-            println!("Long Imm:    {:032b}", self.long_imm);
-            println!("R3:          {:05b}", self.r3);
-            println!("R4:          {:05b}", self.r4);
-            println!("R5:          {:05b}", self.r5);
-            println!("A:           {:032b}", self.a);
-            println!("B:           {:032b}", self.b);
-            println!("WB:          {:032b}", self.wb);
-            println!("WB Addr:     {:032b}", self.wb_addr);
-            println!("Write Enable:{:01b}", self.write_en as i8);
-            println!("PC:          {:032b}", self.pc);
-            println!("------------------------------------------------------");
-            println!("Register Bank:");
-            for (i, reg) in self.reg_bank.iter().enumerate() {
-                println!("R{:02}: {:032b}", i, reg);
-            }
-            println!("======================================================");
-        }
-
         fn get_opcode(&self) -> i8 {
             self.opcode
         }
@@ -198,12 +173,13 @@ pub mod proc {
             // do the alu_op
             let (alu_out, br_flag) = Alu::op(opcode, a, b, imm, pc);
             self.br_flag = br_flag;
-            if opcode < 6 {
+            if opcode < BEQ {
                 //TODO fix this
                 self.a = alu_out;
                 // r3 ist die ziel register adresse für alu op
                 self.r1 = r3; // r3 ist das ziel register
             } else {
+                self.r1 = r2;
                 self.a = a;
             }
             if opcode == LDI {
@@ -212,23 +188,6 @@ pub mod proc {
         }
 
         fn falling_edge(&self) {}
-
-        fn pretty_print(&self) {
-            println!("==================== Execute Phase ====================");
-            println!("Opcode:      {:08b}", self.opcode);
-            println!("R1:          {:05b}", self.r1);
-            println!("R2:          {:05b}", self.r2);
-            println!("Imm:         {:016b}", self.imm);
-            println!("Long Imm:    {:032b}", self.long_imm);
-            println!("R3:          {:05b}", self.r3);
-            println!("R4:          {:05b}", self.r4);
-            println!("R5:          {:05b}", self.r5);
-            println!("A:           {:032b}", self.a);
-            println!("B:           {:032b}", self.b);
-            println!("PC:          {:032b}", self.pc);
-            println!("Branch Flag: {:01b}", self.br_flag as i8);
-            println!("======================================================");
-        }
 
         fn get_opcode(&self) -> i8 {
             self.opcode
@@ -340,21 +299,6 @@ pub mod proc {
 
         fn falling_edge(&self) {}
 
-        fn pretty_print(&self) {
-            println!("==================== Memory Phase =====================");
-            println!("Opcode:      {:08b}", self.opcode);
-            println!("R1:          {:05b}", self.r1);
-            println!("Imm:         {:016b}", self.imm);
-            println!("Long Imm:    {:032b}", self.long_imm);
-            println!("Data:        {:032b}", self.data);
-            println!("Addr:        {:032b}", self.addr);
-            println!("NWE:         {:01b}", self.nwe as i8);
-            println!("Data Out:    {:032b}", self.data_out);
-            println!("PC:          {:032b}", self.pc);
-            println!("Branch Flag: {:01b}", self.br_flag as i8);
-            println!("======================================================");
-        }
-
         fn get_pc(&self) -> i32 {
             self.pc
         }
@@ -394,7 +338,7 @@ pub mod proc {
             self.r1 = r1;
             self.data = data;
             println!("opcode: {}", opcode);
-            if opcode == LDW || opcode == LDI || (opcode < BEQ && opcode > NOP) {
+            if opcode == LDW || opcode == LDI || (opcode < BEQ && opcode > NOP) || opcode == MOV {
                 self.write_en = true;
             } else {
                 self.write_en = false;
@@ -402,15 +346,6 @@ pub mod proc {
         }
 
         fn falling_edge(&self) {}
-
-        fn pretty_print(&self) {
-            println!("==================== WriteBack Phase ==================");
-            println!("Opcode:      {:08b}", self.opcode);
-            println!("R1:          {:05b}", self.r1);
-            println!("Data:        {:032b}", self.data);
-            println!("Write Enable:{:01b}", self.write_en as i8);
-            println!("======================================================");
-        }
 
         fn get_wb(&self) -> i32 {
             self.data
@@ -447,13 +382,6 @@ pub mod proc {
         pub fn load_program(&self, path: PathBuf) -> Processor {
             let rom = DataReader::read_rom_from_file(&path, 1024);
             let mut new_proc = Processor::new_with_rom(rom, &path);
-
-            // FIXME: REMOVE THIS
-            let ram = DataReader::read_rom_from_file(
-                &PathBuf::from("C:\\Git Repositories\\proc_simulator_gui\\ram.dat"),
-                1024,
-            );
-            new_proc.ram = ram;
 
             new_proc.set_num_rep(self.num_representation.clone());
             new_proc
@@ -1254,16 +1182,22 @@ pub mod proc {
             let file = file.unwrap();
             let reader = std::io::BufReader::new(file);
             for (i, line) in reader.lines().enumerate() {
+                // FIXME: Hässliche logic
                 let line = line.unwrap();
+                let split: Vec<&str> = line.split(" ").collect();
+                let line_nr = split[0].parse::<u32>().unwrap();
+                println!("{:?}", split);
+                let line = split[1];
                 let line = line.split("//").next().unwrap().trim(); // Remove comments
                 let line = line.replace(" ", ""); // Remove spaces
                 if !line.is_empty() {
                     println!("{}", line);
                     let value = i32::from_str_radix(&line, 2).unwrap();
-                    rom[i] = value;
+                    rom[line_nr as usize] = value;
                     println!("{:032b}", value);
                 }
             }
+            println!("");
             rom
         }
     }
