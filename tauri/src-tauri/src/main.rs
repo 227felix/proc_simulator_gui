@@ -114,6 +114,8 @@ fn main() {
 
             app.manage(Arc::new(processor_state));
 
+            app.get_webview_window("main").unwrap().open_devtools(); // FIXME: remove this line
+
             Ok(())
         })
         .plugin(tauri_plugin_dialog::init())
@@ -126,7 +128,7 @@ fn main() {
             set_num_representation,
             reset_processor,
             load_program,
-            reload_program
+            reload_program,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

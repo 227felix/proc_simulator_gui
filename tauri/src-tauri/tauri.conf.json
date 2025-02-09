@@ -28,11 +28,13 @@
     "windows": [
       {
         "title": "Proc Sim",
+        "label": "main",
         "useHttpsScheme": true,
         "maximized": true,
         "resizable": true,
         "decorations": false,
-        "transparent": true 
+        "transparent": true,
+        "visible": true
       }
     ],
     "security": {

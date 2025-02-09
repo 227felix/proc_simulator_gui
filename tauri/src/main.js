@@ -7,7 +7,7 @@ let max_digits_hex = 8;
 let max_digits_bin = 32;
 let max_digits_dec = 10;
 let autoclockInterval;
-let autoclockIntervalTime = 250;
+let autoclockIntervalTime = 30;
 
 const { getCurrentWindow } = window.__TAURI__.window;
 
@@ -362,7 +362,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   let autoclock_interval_input = document.querySelector("#autoclock-interval");
 
   autoclock_button.addEventListener("click", (e) => {
-    autoclockIntervalTime = parseInt(autoclock_interval_input.value) || 250;
+    autoclockIntervalTime = parseInt(autoclock_interval_input.value) || 30;
     startAutoclock();
     autoclock_button.style.display = "none";
     stop_button.style.display = "inline-block";
