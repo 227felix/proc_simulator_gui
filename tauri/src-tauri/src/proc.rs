@@ -183,7 +183,7 @@ pub mod proc {
                 self.a = a;
             }
             if opcode == LDI {
-                self.b = imm as i32;
+                self.a = imm as i32;
             }
         }
 
@@ -226,7 +226,7 @@ pub mod proc {
         }
     }
 
-    #[derive(Clone, Serialize)]
+    #[derive(Clone, Serialize, Debug)]
     struct MemoryPhase {
         opcode: i8,
         r1: i8,
@@ -254,12 +254,14 @@ pub mod proc {
             ram: &mut Vec<i32>,
             changed_ramfield: &mut (i32, i32),
         ) {
+            let addr = addr % 65536;
+            // convert the addr to a usize by converting it to bin and interpreting the last 16 bits as an unsigned intS
             self.opcode = opcode;
             self.r1 = r1;
             self.imm = imm;
             self.long_imm = long_imm;
             self.data = data;
-            self.addr = addr;
+            self.addr = addr % 65536;
             self.pc = pc;
             self.br_flag = br_flag;
 
@@ -276,14 +278,19 @@ pub mod proc {
                 self.data_out = ram[self.addr as usize]; // FIXME: eventuell sollte man den RAM als eigene Struktur haben um die Verzögerung korrekt darzustellen
                 *changed_ramfield = (-1, -1);
             } else {
-                ram[self.addr as usize] = self.data;
-                *changed_ramfield = (self.addr, self.data);
+                println!("Addr: {}", addr);
+                let addr_bin = format!("{:032b}", addr);
+                println!("Addr bin: {}", addr_bin);
+                let addr_test = usize::from_str_radix(&addr_bin[16..], 2).unwrap();
+                println!("Addr: {}", addr_test);
+                ram[addr_test as usize] = self.data;
+                *changed_ramfield = (addr_test as i32, self.data);
             }
 
             if self.opcode == LDW {
                 self.data_out = ram[self.addr as usize];
             } else if self.opcode == LDI {
-                self.data_out = self.imm as i32;
+                self.data_out = self.data as i32;
             } else {
                 self.data_out = data;
             }
@@ -380,7 +387,7 @@ pub mod proc {
         }
 
         pub fn load_program(&self, path: PathBuf) -> Processor {
-            let rom = DataReader::read_rom_from_file(&path, 1024);
+            let rom = DataReader::read_rom_from_file(&path, 65536);
             let mut new_proc = Processor::new_with_rom(rom, &path);
 
             new_proc.set_num_rep(self.num_representation.clone());
@@ -397,7 +404,7 @@ pub mod proc {
         }
 
         fn new_with_rom(rom: Vec<i32>, rom_path: &PathBuf) -> Processor {
-            let ram = vec![0; 1024];
+            let ram = vec![0; 65536];
             let fetch = FetchPhase { pc: 0, ir: 0 };
             let decode = DecodePhase {
                 reg_bank: vec![0; 32],
@@ -526,8 +533,8 @@ pub mod proc {
         }
 
         pub fn new_empty_rom() -> Processor {
-            let rom = vec![0; 1024];
-            let ram = vec![0; 1024];
+            let rom = vec![0; 65536];
+            let ram = vec![0; 65536];
             let fetch = FetchPhase { pc: 0, ir: 0 };
             let decode = DecodePhase {
                 reg_bank: vec![0; 32],
@@ -594,8 +601,8 @@ pub mod proc {
         }
 
         pub fn new(path: PathBuf, num_representation: String) -> Processor {
-            let rom = DataReader::read_rom_from_file(&path, 1024);
-            let ram = vec![0; 1024];
+            let rom = DataReader::read_rom_from_file(&path, 65536);
+            let ram = vec![0; 65536];
             let fetch = FetchPhase { pc: 0, ir: 0 };
             let decode = DecodePhase {
                 reg_bank: vec![0; 32],
