@@ -61,6 +61,39 @@ function render_table(table_id, data) {
   }
 }
 
+function render_table_with_fragment(table_id, data) {
+  let table = document.querySelector(`#${table_id}`);
+  // destroy all children
+  while (table.firstChild) {
+    table.removeChild(table.firstChild);
+  }
+  // create a new head
+  let tr_head = document.createElement("tr");
+  let th_key = document.createElement("th");
+  let th_value = document.createElement("th");
+  th_key.textContent = "Key";
+  th_value.textContent = "Value";
+  tr_head.appendChild(th_key);
+  tr_head.appendChild(th_value);
+  table.appendChild(tr_head);
+
+  let fragment = document.createDocumentFragment();
+  for (let key in data) {
+    let value = data[key];
+
+    let tr = document.createElement("tr");
+    tr.setAttribute("data-key", key);
+    let td_key = document.createElement("td");
+    let td_value = document.createElement("td");
+    td_key.textContent = key;
+    td_value.textContent = value;
+    tr.appendChild(td_key);
+    tr.appendChild(td_value);
+    fragment.appendChild(tr);
+  }
+  table.appendChild(fragment);
+}
+
 function update_table(table_id, data) {
   let table = document.querySelector(`#${table_id}`);
   for (let key in data) {
@@ -106,7 +139,7 @@ function render_write_back(write_back) {
 }
 
 function render_rom(rom, fetch_pc) {
-  render_table("rom-table", rom);
+  render_table_with_fragment("rom-table", rom);
   let base;
   switch (num_rep) {
     case "hex":
@@ -135,7 +168,7 @@ function render_rom(rom, fetch_pc) {
 }
 
 function render_ram(ram) {
-  render_table("ram-table", ram);
+  render_table_with_fragment("ram-table", ram);
 }
 
 function render_reg_bank(reg_bank) {
