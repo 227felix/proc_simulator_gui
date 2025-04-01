@@ -15,6 +15,8 @@ pub mod constants {
     pub const STW: i8 = 12;
     pub const LDI: i8 = 13;
     pub const MOV: i8 = 14;
+    pub const MOVPC: i8 = 15;
+    pub const JMPR: i8 = 16;
 
     pub const HALT: i8 = 0b011110;
 }

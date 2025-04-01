@@ -114,7 +114,7 @@ fn main() {
 
             app.manage(Arc::new(processor_state));
 
-            app.get_webview_window("main").unwrap().open_devtools(); // FIXME: remove this line
+            // app.get_webview_window("main").unwrap().open_devtools(); // FIXME: remove this line
 
             Ok(())
         })

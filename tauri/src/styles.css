@@ -285,6 +285,7 @@ h3 {
 }
 .mem-table {
   width: 100%;
+  will-change: transform;
 }
 
 #filepath-div {

@@ -180,7 +180,11 @@ pub mod proc {
                 self.r1 = r3; // r3 ist das ziel register
             } else {
                 self.r1 = r2;
-                self.a = a;
+                if opcode == MOVPC {
+                    self.a = pc
+                } else {
+                    self.a = a;
+                }
             }
             if opcode == LDI {
                 self.a = imm as i32;
@@ -265,7 +269,7 @@ pub mod proc {
             self.pc = pc;
             self.br_flag = br_flag;
 
-            if self.opcode == STW {
+            if self.opcode == STW || self.opcode == MOVPC {
                 self.nwe = false;
             } else {
                 self.nwe = true;
@@ -300,6 +304,10 @@ pub mod proc {
             }
             if self.opcode == JMP {
                 self.pc = self.long_imm;
+                self.br_flag = true;
+            }
+            if self.opcode == JMPR {
+                self.pc = data;
                 self.br_flag = true;
             }
         }
