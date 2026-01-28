@@ -12,8 +12,8 @@ Zum Bauen wird "cargo tauri dev" verwendet, um die Anwendung im Entwicklungsmodu
 Siehe https://v2.tauri.app/start/
 
 ## Performance
-Die Tabellen im Frontend sind sehr schlecht implementiert und daher ist die Performance bei 65k Einträgen für den RAM und ROM nicht sehr gut.
+Die Tabellen im Frontend sind nicht optiaml implementiert und daher ist die Performance bei 65k Einträgen für den RAM und ROM nicht sehr gut.
 
 ## Linux
-Keine Ahnung warum aber manchmal kommt ein Fehler ->
+bekannter Fehler:
 WEBKIT_DISABLE_DMABUF_RENDERER=1 ./procsim
